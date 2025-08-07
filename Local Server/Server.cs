@@ -7,6 +7,7 @@ namespace LocalLobby;
 public class Server
 {
     private TcpListener _listener;
+    private LobbyManager _lobbyManager = new();
     private CancellationTokenSource _cancellationTokenSource;
     private readonly ConcurrentBag<ClientHandler> _handlers = new();
 
@@ -34,7 +35,7 @@ public class Server
 
     private void HandleClient(IClientAdapter adapter, CancellationToken token)
     {
-        var handler = new ClientHandler(adapter);
+        var handler = new ClientHandler(adapter, _lobbyManager);
         _handlers.Add(handler);
         _ = handler.RunAsync(token);
     }

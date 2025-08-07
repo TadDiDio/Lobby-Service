@@ -39,7 +39,7 @@
         /// Promotes another member to owner. Only the owner can do this.
         /// </summary>
         /// <param name="newOwner">The new owner.</param>
-        public void ChangeOwner(LobbyMember newOwner);
+        public void SetOwner(LobbyMember newOwner);
 
         /// <summary>
         /// Kicks a member from the lobby. Only the owner can do this.
@@ -102,6 +102,6 @@
         /// <summary>
         /// Invoked for all members when the lobby owner changes.
         /// </summary>
-        public event Action<OwnerChangedInfo> OwnerChanged;
+        public event Action<OwnerChangedInfo> OwnerSet;
     }
 }
