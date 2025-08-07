@@ -31,7 +31,7 @@ public class ClientHandler : IDisposable
                     if (payload is not ICommand command)
                         throw new JsonException($"Deserialized payload of type '{payload?.GetType().FullName}' does not implement ICommand.");
 
-                    var response = command.Execute(_lobbyManager);
+                    var response = command.Execute(envelope.LobbyId, _lobbyManager);
                     string message = JsonSerializer.Serialize(response);
                     await WriteAsync(message, cancellationToken);
                 }
