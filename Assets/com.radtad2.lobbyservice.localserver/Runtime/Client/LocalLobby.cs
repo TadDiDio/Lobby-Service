@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Debug = UnityEngine.Debug;
 
 namespace LobbyService.LocalServer
 {
@@ -28,10 +30,20 @@ namespace LobbyService.LocalServer
 
         private static async Task InitializeAsync(CancellationToken token)
         {
-            Launcher.EnsureServerExists();
-            await _comms.InitAsync(token);
-
-            IsReady = true;
+            try
+            {
+                Launcher.EnsureServerExists();
+                await _comms.InitAsync(token);
+                IsReady = true;
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignored
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public static async Task WaitUntilReady()
