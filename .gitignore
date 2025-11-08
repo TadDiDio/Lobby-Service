@@ -55,6 +55,9 @@ ExportedObj/
 *.opendb
 *.VC.db
 
+# Reallow the lobby csproj file
+!/Assets/com.radtad2.lobbyservice.localserver/Runtime/Server/LocalLobbyServer.csproj
+
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
