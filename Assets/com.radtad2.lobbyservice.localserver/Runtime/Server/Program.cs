@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 
 namespace LobbyService.LocalServer
 {
@@ -6,8 +7,9 @@ namespace LobbyService.LocalServer
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello, world!");
-            Console.ReadKey();
+            Console.WriteLine($"Starting local lobby server on port {ServerDetails.Port}");
+            var server = new Server(ServerDetails.Port);
+            server.RunAsync(CancellationToken.None).Wait();
         }
     }
 }

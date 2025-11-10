@@ -17,18 +17,17 @@ namespace LobbyService.LocalServer
             _port = port;
         }
 
-        public void Start(CancellationToken token)
+        public async Task RunAsync(CancellationToken token)
         {
             _listener = new TcpListener(IPAddress.Loopback, _port);
             _listener.Start();
 
-            RunAsync(token).LogExceptions();
-        }
-
-        private async Task RunAsync(CancellationToken token)
-        {
-            var client = await _listener.AcceptTcpClientAsync();
-            HandleClient(client, token).LogExceptions();
+            Console.WriteLine("Server started: Accepting clients");
+            while (!token.IsCancellationRequested)
+            {
+                var client = await _listener.AcceptTcpClientAsync();
+                HandleClient(client, token).LogExceptions();
+            }
         }
 
         private async Task HandleClient(TcpClient client, CancellationToken token)
@@ -37,11 +36,15 @@ namespace LobbyService.LocalServer
             
             var buffer = new byte[2048];
             var stringBuilder = new StringBuilder();
-
+            Console.WriteLine("Client connected");
             while (!token.IsCancellationRequested)
             {
                 int bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), token);
-                if (bytesRead == 0) break;
+                if (bytesRead == 0)
+                {
+                    Console.WriteLine("Client disconnected");
+                    break;
+                }
 
                 stringBuilder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
 
@@ -58,6 +61,7 @@ namespace LobbyService.LocalServer
 
         private void HandleMessage(string json)
         {
+            Console.WriteLine("Received: " + json);
             if (!Serializer.Deserialize(json, out var command))
             {
                 Console.WriteLine($"[Local Lobby Server] Received unknown command: {'\n'}{json}");

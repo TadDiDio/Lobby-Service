@@ -1,9 +1,27 @@
+using LobbyService.LocalServer;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LobbyService.Samples.Steam
 {
     public class SampleCoreView : MonoBehaviour, ILobbyCoreView
     {
+        private LobbyController _controller;
+        private void Start()
+        {
+            _controller = FindAnyObjectByType<LobbyController>();
+            _controller.ConnectView(this);
+
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                LocalLobby.Create("Test lobby");
+            }
+        }
+
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
         {
             throw new System.NotImplementedException();

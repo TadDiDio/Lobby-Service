@@ -276,7 +276,7 @@ namespace LobbyService
         public void ConnectView(ILobbyView view)
         {
             if (view == null) return;
-            if (_model.InLobby)
+            if (_model?.InLobby ?? false)
             {
                 if (view is ILobbyCoreView core) core.DisplayExistingLobby(_model);
                 if (view is ILobbyFriendView friend) friend.DisplayUpdatedFriendList(GetFriends());

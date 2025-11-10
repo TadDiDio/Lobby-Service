@@ -33,6 +33,9 @@ namespace LobbyService.LocalServer
             try
             {
                 Launcher.EnsureServerExists();
+                
+                _comms = new Communication();
+
                 await _comms.InitAsync(token);
                 IsReady = true;
             }
@@ -58,17 +61,14 @@ namespace LobbyService.LocalServer
             _client?.Dispose();
         }
 
-        public static void Create()
+        public static void Create(string name)
         {
-            var cmd = new CreateCommand();
-        }
+            var cmd = new CreateCommand
+            {
+                Name = name
+            };
 
-        private static void SendCommand(ICommand command)
-        {
-            var json = Serializer.Serialize(command);
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(json);
-            
-            
+            _comms.SendCommand(cmd);
         }
     }
 }
