@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using LobbyService.LocalServer;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,14 +15,25 @@ namespace LobbyService.Samples.Steam
 
         }
 
+        // TODO: REMOVE
         private void Update()
         {
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
-                LocalLobby.Create("Test lobby");
+                _ = HandleTMPCreate();
             }
         }
 
+        private async Task HandleTMPCreate()
+        {
+            var response = await LocalLobby.Create(new LocalServer.CreateLobbyRequest
+            {
+                Capacity = 4
+            });
+
+            Debug.Log(response.Error);
+        }
+        
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
         {
             throw new System.NotImplementedException();

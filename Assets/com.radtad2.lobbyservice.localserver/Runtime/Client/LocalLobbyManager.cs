@@ -8,5 +8,10 @@ namespace LobbyService.LocalServer
         {
             LocalLobby.Init(destroyCancellationToken);
         }
+
+        private void OnDestroy()
+        {
+            LocalLobby.Shutdown();
+        }
     }
 }

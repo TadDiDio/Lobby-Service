@@ -7,7 +7,7 @@ namespace LobbyService.LocalServer.Client
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Init()
         {
-            CommandRegistry.RegisterCommands();
+            MessageTypeRegistry.RegisterMessageTypes();
         }
     }
 }

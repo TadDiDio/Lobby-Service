@@ -1,6 +1,5 @@
 using System;
-using System.Diagnostics;
-using System.Net.Sockets;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Debug = UnityEngine.Debug;
@@ -15,9 +14,7 @@ namespace LobbyService.LocalServer
         public static bool IsReady { get; private set; }
 
         private static Task _initTask;
-        private static Communication _comms;
-        
-        private static TcpClient _client;
+        private static LocalLobbyClient _client;
         
         /// <summary>
         /// Initializes the local lobby API.
@@ -25,6 +22,7 @@ namespace LobbyService.LocalServer
         /// <param name="token">A token used for async init portions.</param>
         public static void Init(CancellationToken token)
         {
+            ConsoleRedirector.Redirect();
             _initTask = InitializeAsync(token);
         }
 
@@ -34,19 +32,12 @@ namespace LobbyService.LocalServer
             {
                 Launcher.EnsureServerExists();
                 
-                _comms = new Communication();
-
-                await _comms.InitAsync(token);
+                _client = new LocalLobbyClient(IPAddress.Loopback, ServerDetails.Port);
+                await _client.ConnectAsync(token);
                 IsReady = true;
             }
-            catch (OperationCanceledException)
-            {
-                // Ignored
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+            catch (OperationCanceledException) { /* Ignored */ }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         public static async Task WaitUntilReady()
@@ -57,18 +48,60 @@ namespace LobbyService.LocalServer
         
         public static void Shutdown()
         {
-            _client?.Close();
             _client?.Dispose();
         }
 
-        public static void Create(string name)
+        private static async Task<RequestResponse<T>> GetResponseAsync<T>(IRequest request, float timeoutSeconds, CancellationToken token = default) where T : IResponse
         {
-            var cmd = new CreateCommand
-            {
-                Name = name
-            };
+            var message = Message.CreateRequest(request);
+            var task = _client.WaitForResponse(message.RequestId, timeoutSeconds, token);
+            
+            _client.Send(message);
+            
+            var response = await task;
 
-            _comms.SendCommand(cmd);
+            if (response == null)
+            {
+                return new RequestResponse<T>
+                {
+                    Error = Error.Timeout,
+                    Response = default
+                };
+            }
+            
+            if (!MessageTypeRegistry.TryGetType(response.Type, out var type))
+            {
+                Debug.Log("HEre");
+
+                return new RequestResponse<T>
+                {
+                    Error = Error.Serialization,
+                    Response = default
+                };
+            }
+
+            
+            if (response.Payload.ToObject(type) is not T typedResponse)
+            {
+                return new RequestResponse<T>
+                {
+                    Error = Error.Serialization,
+                    Response = default
+                };
+            }
+            
+            
+            
+            return new RequestResponse<T>
+            {
+                Error = response.Error,
+                Response = typedResponse,
+            };
+        }
+        
+        public static async Task<RequestResponse<EnterResponse>> Create(CreateLobbyRequest request, float timeoutSeconds = 10f, CancellationToken token = default)
+        {
+           return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
         }
     }
 }

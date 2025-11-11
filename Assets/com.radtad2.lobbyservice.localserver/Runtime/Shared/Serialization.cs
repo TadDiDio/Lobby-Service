@@ -2,23 +2,17 @@ using Newtonsoft.Json;
 
 namespace LobbyService.LocalServer
 {
-    public static class Serializer
+    public static class MessageSerializer
     {
-        public static bool Deserialize(string json, out ICommand command)
+        public static string Serialize(Message message)
         {
-            command = null;
-            
-            var message = JsonConvert.DeserializeObject<Message>(json);
-            if (message == null) return false;
-            
-            command = CommandRegistry.Get(message.Type);
-            return command != null;
+            return JsonConvert.SerializeObject(message);
         }
         
-        public static string Serialize(ICommand command)
+        public static bool Deserialize(string json, out Message message)
         {
-            var message = new Message(command);
-            return JsonConvert.SerializeObject(message);
+            message = JsonConvert.DeserializeObject<Message>(json);
+            return message != null;
         }
     }
 }

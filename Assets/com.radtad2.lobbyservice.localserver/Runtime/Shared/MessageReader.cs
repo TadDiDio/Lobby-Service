@@ -1,0 +1,81 @@
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace LobbyService.LocalServer
+{
+    public class MessageReader : IDisposable
+    {
+        public event Action<Message> OnMessage;
+        public event Action OnDisconnected;
+        
+        private CancellationTokenSource _tokenSource;
+        
+        public MessageReader(StreamReader reader)
+        {
+            _tokenSource = new CancellationTokenSource();
+            ReceiveLoopAsync(reader).LogExceptions();
+        }
+        
+        public async Task<Message> WaitForMessageAsync(string messageId, float timeoutSeconds, CancellationToken token)
+        {
+            var combined = CancellationTokenSource.CreateLinkedTokenSource(token, _tokenSource.Token);
+            var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void Listener(Message msg)
+            {
+                if (msg.RequestId != messageId) return;
+                
+                OnMessage -= Listener;
+                tcs.TrySetResult(msg);
+            }
+
+            OnMessage += Listener;
+
+            try
+            {
+                var delayTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds), combined.Token);
+                var completed = await Task.WhenAny(tcs.Task, delayTask);
+
+                if (completed == tcs.Task) return await tcs.Task;
+
+                OnMessage -= Listener;
+                return null;
+            }
+            finally { OnMessage -= Listener; }
+        }
+        
+        private async Task ReceiveLoopAsync(StreamReader reader)
+        {
+            while (!_tokenSource.IsCancellationRequested)
+            {
+                string line;
+                try
+                {
+                    line = await reader.ReadLineAsync().AsCancellable(_tokenSource.Token);
+                }
+                catch (OperationCanceledException) { break; }
+                catch (IOException) { break; } 
+
+                if (line == null) break;
+
+                if (!MessageSerializer.Deserialize(line, out var message))
+                {
+                    SharedLogger.WriteLine($"Received badly formatted message: {Environment.NewLine}{line}.");
+                    continue;
+                }
+                
+                OnMessage?.Invoke(message);
+            }
+
+            OnDisconnected?.Invoke();
+        }
+
+        public void Dispose()
+        {
+            _tokenSource?.Cancel();
+            _tokenSource?.Dispose();
+        }
+    }
+}
