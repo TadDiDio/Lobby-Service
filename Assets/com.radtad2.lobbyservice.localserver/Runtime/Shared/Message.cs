@@ -6,7 +6,7 @@ namespace LobbyService.LocalServer
     public class Message
     {
         public Error Error { get; set; } = Error.Ok;
-        public string RequestId {get; set;} = string.Empty;
+        public Guid RequestId { get; set; } = Guid.Empty;
         public string Type { get; set; } = string.Empty;
         public JToken Payload {get; set;}
 
@@ -19,13 +19,13 @@ namespace LobbyService.LocalServer
             return new Message
             {
                 Error = Error.Ok,
-                RequestId = Guid.NewGuid().ToString(),
+                RequestId = Guid.NewGuid(),
                 Type = request.GetType().FullName,
                 Payload = JObject.FromObject(request)
             };
         }
 
-        public static Message CreateResponse(IResponse response, string requestId)
+        public static Message CreateResponse(IResponse response, Guid requestId)
         {
             return new Message
             {
@@ -36,7 +36,7 @@ namespace LobbyService.LocalServer
             };
         }
         
-        public static Message CreateFailure(Error error, string requestId)
+        public static Message CreateFailure(Error error, Guid requestId)
         {
             return new Message
             {

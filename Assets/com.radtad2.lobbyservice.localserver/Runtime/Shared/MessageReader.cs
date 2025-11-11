@@ -18,7 +18,7 @@ namespace LobbyService.LocalServer
             ReceiveLoopAsync(reader).LogExceptions();
         }
         
-        public async Task<Message> WaitForMessageAsync(string messageId, float timeoutSeconds, CancellationToken token)
+        public async Task<Message> WaitForMessageAsync(Guid messageId, float timeoutSeconds, CancellationToken token)
         {
             var combined = CancellationTokenSource.CreateLinkedTokenSource(token, _tokenSource.Token);
             var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);

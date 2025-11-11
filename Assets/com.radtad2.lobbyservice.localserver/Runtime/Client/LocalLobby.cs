@@ -11,10 +11,13 @@ namespace LobbyService.LocalServer
     /// </summary>
     public static class LocalLobby
     {
-        public static bool IsReady { get; private set; }
+        public static bool Initialized { get; private set; }
 
         private static Task _initTask;
         private static LocalLobbyClient _client;
+
+        private static LobbyMember _localUser;
+        
         
         /// <summary>
         /// Initializes the local lobby API.
@@ -33,8 +36,16 @@ namespace LobbyService.LocalServer
                 Launcher.EnsureServerExists();
                 
                 _client = new LocalLobbyClient(IPAddress.Loopback, ServerDetails.Port);
-                await _client.ConnectAsync(token);
-                IsReady = true;
+                if (!await _client.ConnectAsync(token)) return;
+
+                var welcome = await GetResponseAsync<WelcomeResponse>(new ConnectRequest(), 3f, token);
+
+                if (welcome.Error is not Error.Ok) return;
+                
+                _localUser = welcome.Response.LocalMember.ToLobbyMember();
+                
+                Initialized = true;
+                Debug.Log($"[Local Lobby] Initialized as user {_localUser}");
             }
             catch (OperationCanceledException) { /* Ignored */ }
             catch (Exception e) { Debug.LogException(e); }
@@ -51,6 +62,12 @@ namespace LobbyService.LocalServer
             _client?.Dispose();
         }
 
+        private static void SendCommand(IRequest request)
+        {
+            var message = Message.CreateRequest(request);
+            _client.Send(message);
+        }
+        
         private static async Task<RequestResponse<T>> GetResponseAsync<T>(IRequest request, float timeoutSeconds, CancellationToken token = default) where T : IResponse
         {
             var message = Message.CreateRequest(request);
@@ -69,19 +86,7 @@ namespace LobbyService.LocalServer
                 };
             }
             
-            if (!MessageTypeRegistry.TryGetType(response.Type, out var type))
-            {
-                Debug.Log("HEre");
-
-                return new RequestResponse<T>
-                {
-                    Error = Error.Serialization,
-                    Response = default
-                };
-            }
-
-            
-            if (response.Payload.ToObject(type) is not T typedResponse)
+            if (!MessageTypeRegistry.TryGetType(response.Type, out var type) || response.Payload.ToObject(type) is not T typedResponse)
             {
                 return new RequestResponse<T>
                 {
@@ -89,9 +94,7 @@ namespace LobbyService.LocalServer
                     Response = default
                 };
             }
-            
-            
-            
+
             return new RequestResponse<T>
             {
                 Error = response.Error,
@@ -99,9 +102,21 @@ namespace LobbyService.LocalServer
             };
         }
         
-        public static async Task<RequestResponse<EnterResponse>> Create(CreateLobbyRequest request, float timeoutSeconds = 10f, CancellationToken token = default)
+        public static LobbyMember GetLocalUser() => _localUser;
+
+        public static async Task<RequestResponse<EnterResponse>> Create(CreateLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
         {
            return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
+        }
+        
+        public static async Task<RequestResponse<EnterResponse>> Join(JoinLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
+        {
+            return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
+        }
+
+        public static void Leave(LeaveLobbyRequest request)
+        {
+            SendCommand(request);
         }
     }
 }

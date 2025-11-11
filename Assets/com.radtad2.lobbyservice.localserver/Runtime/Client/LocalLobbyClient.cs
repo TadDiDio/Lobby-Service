@@ -23,7 +23,7 @@ namespace LobbyService.LocalServer
             _port = port;
         }
 
-        public async Task ConnectAsync(CancellationToken token)
+        public async Task<bool> ConnectAsync(CancellationToken token)
         {
             while (!_client.Connected && !token.IsCancellationRequested)
             {
@@ -35,12 +35,13 @@ namespace LobbyService.LocalServer
                 catch (SocketException) { await Task.Delay(500, token); }
             }
 
-            if (!_client.Connected) return;
+            if (!_client.Connected) return false;
 
             var stream = _client.GetStream();
             
             _reader = new MessageReader(new StreamReader(stream, Encoding.UTF8));
             _writer = new MessageWriter(new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true});
+            return true;
         }
 
         public void Send(Message message)
@@ -48,7 +49,7 @@ namespace LobbyService.LocalServer
             _writer.Send(message);
         }
 
-        public async Task<Message> WaitForResponse(string id, float timeoutSeconds, CancellationToken token)
+        public async Task<Message> WaitForResponse(Guid id, float timeoutSeconds, CancellationToken token)
         {
             return await _reader.WaitForMessageAsync(id, timeoutSeconds, token);
         }
