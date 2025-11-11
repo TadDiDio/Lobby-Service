@@ -15,7 +15,9 @@ namespace LobbyService.LocalServer
             
             var commandTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => (typeof(IRequest).IsAssignableFrom(t) || typeof(IResponse).IsAssignableFrom(t))
+                .Where(t => (typeof(IRequest).IsAssignableFrom(t) 
+                             || typeof(IResponse).IsAssignableFrom(t)
+                             || typeof(IEvent).IsAssignableFrom(t))
                             && !t.IsInterface
                             && !t.IsAbstract);
 

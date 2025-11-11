@@ -10,6 +10,8 @@ namespace LobbyService.LocalServer
 {
     public class LocalLobbyClient : IDisposable
     {
+        public event Action<Message> OnMessageReceived;
+        
         private int _port;
         private IPAddress _ip;
 
@@ -41,6 +43,9 @@ namespace LobbyService.LocalServer
             
             _reader = new MessageReader(new StreamReader(stream, Encoding.UTF8));
             _writer = new MessageWriter(new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true});
+            
+            _reader.OnMessage += OnMessageReceived;
+            
             return true;
         }
 
@@ -56,6 +61,7 @@ namespace LobbyService.LocalServer
         
         public void Dispose()
         {
+            if (_reader != null) _reader.OnMessage -= OnMessageReceived;
             _reader?.Dispose();
             _writer?.Dispose();
             _client?.Close();

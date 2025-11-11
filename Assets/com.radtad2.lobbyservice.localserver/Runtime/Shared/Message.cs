@@ -36,6 +36,17 @@ namespace LobbyService.LocalServer
             };
         }
         
+        public static Message CreateEvent(IEvent evt)
+        {
+            return new Message
+            {
+                Error = Error.Ok,
+                RequestId = Guid.Empty,
+                Type = evt.GetType().FullName,
+                Payload = JObject.FromObject(evt)
+            };
+        }
+
         public static Message CreateFailure(Error error, Guid requestId)
         {
             return new Message

@@ -1,102 +1,96 @@
-using System.Threading.Tasks;
-using LobbyService.LocalServer;
+using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace LobbyService.Samples.Steam
 {
     public class SampleCoreView : MonoBehaviour, ILobbyCoreView
     {
+        public TMP_Text lobbyNameText;
+        
         private LobbyController _controller;
-        private void Start()
+        
+        public void SetController(LobbyController controller) => _controller = controller;
+        
+        public void Create()
         {
-            _controller = FindAnyObjectByType<LobbyController>();
-            _controller.ConnectView(this);
-
-        }
-
-        // TODO: REMOVE
-        private void Update()
-        {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            _controller?.Create(new CreateLobbyRequest
             {
-                _ = HandleTMPCreate();
-            }
-        }
-
-        private async Task HandleTMPCreate()
-        {
-            var response = await LocalLobby.Create(new LocalServer.CreateLobbyRequest
-            {
-                Capacity = 4
+                Capacity = 4,
+                LobbyType =  LobbyType.Public,
+                Name = "My lobby"
             });
+        }
 
-            Debug.Log(response.Error);
+        public void Leave()
+        {
+            _controller?.Leave();
         }
         
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Displaying existing lobby");
         }
 
         public void DisplayCreateRequested(CreateLobbyRequest request)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Creating lobby...");
         }
 
         public void DisplayCreateResult(EnterLobbyResult result)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Created lobby: " + result.Success);
+            lobbyNameText.text = $"{result.LocalMember.DisplayName}'s lobby";
         }
 
         public void DisplayJoinRequested(JoinLobbyRequest request)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Joining lobby...");
         }
 
         public void DisplayJoinResult(EnterLobbyResult result)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Joined a lobby");
         }
 
         public void DisplayLocalMemberLeft(LeaveInfo info)
         {
-            throw new System.NotImplementedException();
+            lobbyNameText.text = "No lobby";
+            Debug.Log("Left lobby");
         }
 
         public void DisplaySendInvite(InviteSentInfo info)
         {
-            throw new System.NotImplementedException();
+            if (info.InviteSent) Debug.Log($"Sending invite to {info.Member}...");
         }
 
         public void DisplayReceivedInvite(LobbyInvite invite)
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"Got an invite from {invite.Sender}");
         }
 
         public void DisplayOtherMemberJoined(MemberJoinedInfo info)
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"{info.Member} joined");
         }
 
         public void DisplayOtherMemberLeft(LeaveInfo info)
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"{info.Member} left. Reason: {info.LeaveReason}");
         }
 
         public void DisplayUpdateOwner(LobbyMember newOwner)
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"{newOwner} is the new owner");
         }
 
         public void DisplayUpdateLobbyData(LobbyDataUpdate update)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Lobby data updated");
         }
 
         public void DisplayUpdateMemberData(MemberDataUpdate update)
         {
-            throw new System.NotImplementedException();
+            Debug.Log($"{update.Member}'s data updated");
         }
     }
 }

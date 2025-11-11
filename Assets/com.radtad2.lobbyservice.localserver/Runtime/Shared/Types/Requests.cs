@@ -19,4 +19,41 @@ namespace LobbyService.LocalServer
     {
         public string LobbyId { get; set; }
     }
+    
+    public class CloseLobbyRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+    }
+
+    public class InviteMemberRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+        public string InviteeId { get; set; }
+    }
+    
+    public class KickMemberRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+        public string KickeeId { get; set; }
+    }
+    
+    public class SetOwnerRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+        public string NewOwnerId { get; set; }
+    }
+
+    public class LobbyDataRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+    
+    public class MemberDataRequest : IRequest
+    {
+        public string LobbyId { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
 }
