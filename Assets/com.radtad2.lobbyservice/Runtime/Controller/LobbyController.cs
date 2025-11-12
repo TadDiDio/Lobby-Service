@@ -147,7 +147,7 @@ namespace LobbyService
 
             if (_provider is ILobbyFriendService friends)
             {
-                _friends = new FriendsModule(friends);
+                _friends = new FriendsModule(this, friends);
 
                 if (rules.AutoStartFriendPolling) friends.StartFriendPolling(rules.FriendDiscoveryFilter, rules.FriendPollingRateSeconds);
             }

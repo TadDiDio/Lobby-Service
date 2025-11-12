@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LobbyService.LocalServer
 {
-    public class LocalLobbyProvider : BaseLobbyProvider
+    public class LocalLobbyProvider : BaseLobbyProvider, ILobbyFriendService
     {
         public override event Action<MemberJoinedInfo> OnOtherMemberJoined;
         public override event Action<LeaveInfo> OnOtherMemberLeft;
@@ -18,26 +20,26 @@ namespace LobbyService.LocalServer
         {
             EnsureInitialized();
 
-            LocalLobby.OnOtherMemberJoined += OnOtherMemberJoined;
-            LocalLobby.OnOtherMemberLeft += OnOtherMemberLeft;
-            LocalLobby.OnLocalMemberKicked += OnLocalMemberKicked;
-            LocalLobby.OnReceivedInvitation += OnReceivedInvitation;
-            LocalLobby.OnLobbyDataUpdated += OnLobbyDataUpdated;
-            LocalLobby.OnMemberDataUpdated += OnMemberDataUpdated;
-            LocalLobby.OnOwnerUpdated += OnOwnerUpdated;
+            LocalLobby.OnOtherMemberJoined += HandleOtherMemberJoined;
+            LocalLobby.OnOtherMemberLeft += HandleOtherMemberLeft;
+            LocalLobby.OnLocalMemberKicked += HandleLocalMemberKicked;
+            LocalLobby.OnReceivedInvitation += HandleReceivedInvitation;
+            LocalLobby.OnLobbyDataUpdated += HandleLobbyDataUpdated;
+            LocalLobby.OnMemberDataUpdated += HandleMemberDataUpdated;
+            LocalLobby.OnOwnerUpdated += HandleOwnerUpdated;
             
             _controller = controller;
         }
 
         public override void Dispose()
         {
-            LocalLobby.OnOtherMemberJoined -= OnOtherMemberJoined;
-            LocalLobby.OnOtherMemberLeft -= OnOtherMemberLeft;
-            LocalLobby.OnLocalMemberKicked -= OnLocalMemberKicked;
-            LocalLobby.OnReceivedInvitation -= OnReceivedInvitation;
-            LocalLobby.OnLobbyDataUpdated -= OnLobbyDataUpdated;
-            LocalLobby.OnMemberDataUpdated -= OnMemberDataUpdated;
-            LocalLobby.OnOwnerUpdated -= OnOwnerUpdated;
+            LocalLobby.OnOtherMemberJoined -= HandleOtherMemberJoined;
+            LocalLobby.OnOtherMemberLeft -= HandleOtherMemberLeft;
+            LocalLobby.OnLocalMemberKicked -= HandleLocalMemberKicked;
+            LocalLobby.OnReceivedInvitation -= HandleReceivedInvitation;
+            LocalLobby.OnLobbyDataUpdated -= HandleLobbyDataUpdated;
+            LocalLobby.OnMemberDataUpdated -= HandleMemberDataUpdated;
+            LocalLobby.OnOwnerUpdated -= HandleOwnerUpdated;
         }
         
         private void EnsureInitialized()
@@ -46,6 +48,7 @@ namespace LobbyService.LocalServer
                 throw new InvalidOperationException("LocalLobby must be initialized before use");
         }
         
+        #region Core
         public override LobbyMember GetLocalUser()
         {
             EnsureInitialized();
@@ -208,5 +211,62 @@ namespace LobbyService.LocalServer
             EnsureInitialized();
             return LocalLobby.GetMemberDataOrDefault(lobbyId.ToString(), member.Id.ToString(), key, defaultValue);
         }
+        
+        private void HandleOtherMemberJoined(MemberJoinedInfo info) => OnOtherMemberJoined?.Invoke(info);
+        private void HandleOtherMemberLeft(LeaveInfo info) => OnOtherMemberLeft?.Invoke(info);
+        private void HandleLocalMemberKicked(KickInfo info) => OnLocalMemberKicked?.Invoke(info);
+        private void HandleReceivedInvitation(LobbyInvite invite) => OnReceivedInvitation?.Invoke(invite);
+        private void HandleLobbyDataUpdated(LobbyDataUpdate update) => OnLobbyDataUpdated?.Invoke(update);
+        private void HandleMemberDataUpdated(MemberDataUpdate update) => OnMemberDataUpdated?.Invoke(update);
+        private void HandleOwnerUpdated(LobbyMember newOwner) => OnOwnerUpdated?.Invoke(newOwner);
+        #endregion
+        
+        #region Friends
+
+        private float _pollingInterval;
+        private CancellationTokenSource _friendCts;
+        public event Action<List<LobbyMember>> FriendsUpdated;
+        public void StartFriendPolling(FriendDiscoveryFilter filter, float intervalSeconds, CancellationToken token = default)
+        {
+            EnsureInitialized();
+            
+            _pollingInterval = intervalSeconds;
+
+            _friendCts = new CancellationTokenSource();
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(_friendCts.Token, token);
+
+            _ = FriendLoop(cts.Token);
+        }
+
+        private async Task FriendLoop(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var response = await LocalLobby.GetFriends(token: token);
+
+                if (response.Error is Error.Ok)
+                {
+                    FriendsUpdated?.Invoke(response.Response.Friends.ToLobbyMembers());
+                }
+                
+                await Task.Delay(TimeSpan.FromSeconds(_pollingInterval), token);
+            }
+        }
+        
+        public void SetFriendPollingInterval(float intervalSeconds)
+        {
+            _pollingInterval = intervalSeconds;
+        }
+
+        public void SetFriendPollingFilter(FriendDiscoveryFilter filter) { }
+
+        public void StopFriendPolling()
+        {
+            _friendCts?.Cancel();
+            _friendCts?.Dispose();
+            _friendCts = null;
+        }
+        
+        #endregion
     }
 }

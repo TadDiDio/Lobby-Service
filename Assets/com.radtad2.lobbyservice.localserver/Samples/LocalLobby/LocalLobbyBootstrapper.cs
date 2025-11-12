@@ -20,7 +20,7 @@ namespace LobbyService.LocalServer
             try
             {
                 // Local provider relies on LocalLobby API so wait for that to initialize.
-                await LocalLobby.WaitForInitializationAsync(destroyCancellationToken);
+                if (!await LocalLobby.WaitForInitializationAsync(destroyCancellationToken)) return;
             
                 var provider = new LocalLobbyProvider();
 

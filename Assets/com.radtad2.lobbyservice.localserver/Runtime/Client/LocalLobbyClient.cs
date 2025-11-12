@@ -11,6 +11,7 @@ namespace LobbyService.LocalServer
     public class LocalLobbyClient : IDisposable
     {
         public event Action<Message> OnMessageReceived;
+        public event Action OnDisconnected;
         
         private int _port;
         private IPAddress _ip;
@@ -43,17 +44,21 @@ namespace LobbyService.LocalServer
             
             _reader = new MessageReader(new StreamReader(stream, Encoding.UTF8));
             _writer = new MessageWriter(new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true});
-            
-            _reader.OnMessage += OnMessageReceived;
+
+            _reader.OnMessage += HandleMessageReceived;
+            _reader.OnDisconnected += HandleDisconnected;
             
             return true;
         }
 
+        private void HandleMessageReceived(Message m) => OnMessageReceived?.Invoke(m);
+        private void HandleDisconnected() => OnDisconnected?.Invoke();
+        
         public void Send(Message message)
         {
             _writer.Send(message);
         }
-
+        
         public async Task<Message> WaitForResponse(Guid id, float timeoutSeconds, CancellationToken token)
         {
             return await _reader.WaitForMessageAsync(id, timeoutSeconds, token);
@@ -61,7 +66,12 @@ namespace LobbyService.LocalServer
         
         public void Dispose()
         {
-            if (_reader != null) _reader.OnMessage -= OnMessageReceived;
+            if (_reader != null)
+            {
+                _reader.OnMessage -= HandleMessageReceived;
+                _reader.OnDisconnected -= HandleDisconnected;
+            }
+            
             _reader?.Dispose();
             _writer?.Dispose();
             _client?.Close();

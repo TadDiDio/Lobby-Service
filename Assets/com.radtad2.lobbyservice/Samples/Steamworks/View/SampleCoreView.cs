@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LobbyService.Samples.Steam
 {
-    public class SampleCoreView : MonoBehaviour, ILobbyCoreView
+    public class SampleCoreView : MonoBehaviour, ILobbyCoreView, ILobbyFriendView
     {
         public TMP_Text lobbyNameText;
         
@@ -91,6 +95,23 @@ namespace LobbyService.Samples.Steam
         public void DisplayUpdateMemberData(MemberDataUpdate update)
         {
             Debug.Log($"{update.Member}'s data updated");
+        }
+
+        public void DisplayUpdatedFriendList(IReadOnlyList<LobbyMember> friends)
+        {
+            
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            {
+                _controller.SendInvite(_controller.GetFriends()[0]);
+            }
+            if (Keyboard.current.digit2Key.wasPressedThisFrame)
+            {
+                _controller.SendInvite(_controller.GetFriends()[1]);
+            }
         }
     }
 }

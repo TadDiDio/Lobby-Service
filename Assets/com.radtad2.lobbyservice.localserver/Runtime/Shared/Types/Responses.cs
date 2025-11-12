@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 
 namespace LobbyService.LocalServer
 {
@@ -14,5 +14,16 @@ namespace LobbyService.LocalServer
     public class EnterResponse : IResponse
     {
         public LobbySnapshot Snapshot { get; set; }
+    }
+
+    
+    
+    
+    
+    
+    
+    public class QueryFriendsResponse : IResponse
+    {
+        public List<LocalLobbyMember> Friends { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace LobbyService.LocalServer
     public static class LocalLobby
     {
         public static bool Initialized { get; private set; }
-        private static Task _initTask;
+        private static Task<bool> _initTask;
         
         private static LocalLobbyClient _client;
         private static LobbyMember _localUser;
@@ -21,27 +21,29 @@ namespace LobbyService.LocalServer
         
         private static CancellationTokenSource _shutdownCts;
         
-        public static Task WaitForInitializationAsync(CancellationToken token)
+        public static async Task<bool> WaitForInitializationAsync(CancellationToken token)
         {
-            if (Initialized) return Task.CompletedTask;
-            if (_initTask != null) return _initTask;
+            if (Initialized) return true;
+            if (_initTask != null) return await _initTask;
 
             _shutdownCts = CancellationTokenSource.CreateLinkedTokenSource(token);
             
             _initTask = InitializeAsync(_shutdownCts.Token);
-            return _initTask;
+            return await _initTask;
         }
         
-        private static async Task InitializeAsync(CancellationToken token)
+        private static async Task<bool> InitializeAsync(CancellationToken token)
         {
             try
             {
+                ConsoleRedirector.Redirect();
+                
                 _cachedLobbies = new Dictionary<string, LobbySnapshot>();
                 
                 Launcher.EnsureServerExists();
 
                 _client = new LocalLobbyClient(IPAddress.Loopback, ServerDetails.Port);
-                if (!await _client.ConnectAsync(token)) return;
+                if (!await _client.ConnectAsync(token)) return false;
 
                 var welcome = await GetResponseAsync<WelcomeResponse>(new ConnectRequest(), 3f, token);
 
@@ -52,14 +54,17 @@ namespace LobbyService.LocalServer
                 
                 Initialized = true;
                 Debug.Log($"[Local Lobby] Initialized as user {_localUser}");
+                return true;
             }
             catch (OperationCanceledException)
             {
                 /* Ignored */
+                return false;
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
+                return false;
             }
             finally
             {
@@ -83,6 +88,8 @@ namespace LobbyService.LocalServer
 
             _cachedLobbies = null;
             _client?.Dispose();
+            
+            ConsoleRedirector.Return();
         }
         
         private static void SendCommand(IRequest request)
@@ -254,6 +261,15 @@ namespace LobbyService.LocalServer
         {
             return defaultValue;
         }
+        #endregion
+        
+        #region Friends
+
+        public static async Task<RequestResponse<QueryFriendsResponse>> GetFriends(float timeoutSeconds = 3f, CancellationToken token = default)
+        {
+            return await GetResponseAsync<QueryFriendsResponse>(new QueryFriendsRequest(), timeoutSeconds, token);
+        }
+        
         #endregion
     }
 }

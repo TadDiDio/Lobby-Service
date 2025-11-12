@@ -56,4 +56,6 @@ namespace LobbyService.LocalServer
         public string Key { get; set; }
         public string Value { get; set; }
     }
+
+    public class QueryFriendsRequest : IRequest { }
 }

@@ -6,13 +6,15 @@ namespace LobbyService
 {
     public class FriendsModule : IDisposable
     {
+        private LobbyController _controller;
         private ILobbyFriendService _provider;
         private List<LobbyMember> _currentFriends = new();
 
         private CancellationTokenSource _tokenSource = new();
 
-        public FriendsModule(ILobbyFriendService friends)
+        public FriendsModule(LobbyController controller, ILobbyFriendService friends)
         {
+            _controller = controller;
             _provider = friends;
             _provider.FriendsUpdated += OnUpdate;
         }
@@ -37,6 +39,7 @@ namespace LobbyService
         private void OnUpdate(List<LobbyMember> friends)
         {
             _currentFriends = friends;
+            _controller.BroadcastToViews<ILobbyFriendView>(v => v.DisplayUpdatedFriendList(_currentFriends));
         }
 
         /// <summary>
