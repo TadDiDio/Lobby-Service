@@ -15,7 +15,7 @@ namespace LobbyService.LocalServer
         {
             _tokenSource = new CancellationTokenSource();
             
-            SendLoopAsync(writer).LogExceptions();
+            _ = SendLoopAsync(writer);
         }
         
         public void Send(Message message)
@@ -25,18 +25,25 @@ namespace LobbyService.LocalServer
         
         private async Task SendLoopAsync(StreamWriter writer)
         {
-            while (!_tokenSource.IsCancellationRequested)
+            try
             {
-                try
+                while (!_tokenSource.IsCancellationRequested)
                 {
-                    if (_queue.TryDequeue(out var msg))
+                    try
                     {
-                        var json = MessageSerializer.Serialize(msg);
-                        await writer.WriteLineAsync(json).AsCancellable(_tokenSource.Token);
+                        if (_queue.TryDequeue(out var msg))
+                        {
+                            var json = MessageSerializer.Serialize(msg);
+                            await writer.WriteLineAsync(json).AsCancellable(_tokenSource.Token);
+                        }
+                        else await Task.Delay(10, _tokenSource.Token);
                     }
-                    else await Task.Delay(10, _tokenSource.Token);
+                    catch (OperationCanceledException) { break; }
                 }
-                catch (OperationCanceledException) { break; }
+            }
+            catch (Exception e)
+            {
+                SharedLogger.WriteLine(e);
             }
         }
 

@@ -49,6 +49,7 @@ namespace LobbyService.Samples.Steam
 
         public void Dispose() =>_lobby.DisconnectView(this);
 
+        public void Reset() { }
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot) { }
         public void DisplayCreateRequested(CreateLobbyRequest request) { }
         public void DisplayJoinRequested(JoinLobbyRequest request) { }

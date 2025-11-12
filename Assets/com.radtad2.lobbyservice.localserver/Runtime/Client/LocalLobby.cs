@@ -47,6 +47,8 @@ namespace LobbyService.LocalServer
 
                 var welcome = await GetResponseAsync<WelcomeResponse>(new ConnectRequest(), 3f, token);
 
+                if (token.IsCancellationRequested) return false;
+                
                 if (welcome.Error is not Error.Ok) throw new Exception($"Failed to receive welcome response with error: {welcome.Error}");
 
                 _client.OnMessageReceived += HandleMessage;
@@ -100,36 +102,57 @@ namespace LobbyService.LocalServer
         
         private static async Task<RequestResponse<T>> GetResponseAsync<T>(IRequest request, float timeoutSeconds, CancellationToken token = default) where T : IResponse
         {
-            var message = Message.CreateRequest(request);
-            var task = _client.WaitForResponse(message.RequestId, timeoutSeconds, token);
-            
-            _client.Send(message);
-            
-            var response = await task;
+            try
+            {
+                var message = Message.CreateRequest(request);
+                var task = _client.WaitForResponse(message.RequestId, timeoutSeconds, token);
 
-            if (response == null)
+                _client.Send(message);
+
+                var response = await task;
+
+                if (response == null)
+                {
+                    return new RequestResponse<T>
+                    {
+                        Error = Error.Timeout,
+                        Response = default
+                    };
+                }
+
+                if (!MessageTypeRegistry.TryGetType(response.Type, out var type) ||
+                    response.Payload.ToObject(type) is not T typedResponse)
+                {
+                    return new RequestResponse<T>
+                    {
+                        Error = Error.Serialization,
+                        Response = default
+                    };
+                }
+
+                return new RequestResponse<T>
+                {
+                    Error = response.Error,
+                    Response = typedResponse,
+                };
+            }
+            catch (OperationCanceledException)
             {
                 return new RequestResponse<T>
                 {
-                    Error = Error.Timeout,
+                    Error = Error.Cancelled,
                     Response = default
                 };
             }
-            
-            if (!MessageTypeRegistry.TryGetType(response.Type, out var type) || response.Payload.ToObject(type) is not T typedResponse)
+            catch (Exception e)
             {
+                Debug.LogException(e);
                 return new RequestResponse<T>
                 {
-                    Error = Error.Serialization,
+                    Error = Error.Unknown,
                     Response = default
                 };
             }
-
-            return new RequestResponse<T>
-            {
-                Error = response.Error,
-                Response = typedResponse,
-            };
         }
 
         private static void CacheSnapshot(LobbySnapshot snapshot)
@@ -206,7 +229,7 @@ namespace LobbyService.LocalServer
         public static async Task<RequestResponse<EnterResponse>> Create(CreateLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
         {
            var response = await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
-            
+           
            if (response.Error is Error.Ok) CacheSnapshot(response.Response.Snapshot);
            
            return response;

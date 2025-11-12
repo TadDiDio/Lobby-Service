@@ -15,7 +15,7 @@ namespace LobbyService.LocalServer
         public MessageReader(StreamReader reader)
         {
             _tokenSource = new CancellationTokenSource();
-            ReceiveLoopAsync(reader).LogExceptions();
+            _ = ReceiveLoopAsync(reader);
         }
         
         public async Task<Message> WaitForMessageAsync(Guid messageId, float timeoutSeconds, CancellationToken token)
@@ -43,33 +43,45 @@ namespace LobbyService.LocalServer
                 OnMessage -= Listener;
                 return null;
             }
+            catch (Exception e)
+            {
+                SharedLogger.WriteLine(e);
+                throw;
+            }
             finally { OnMessage -= Listener; }
         }
         
         private async Task ReceiveLoopAsync(StreamReader reader)
         {
-            while (!_tokenSource.IsCancellationRequested)
+            try
             {
-                string line;
-                try
+                while (!_tokenSource.IsCancellationRequested)
                 {
-                    line = await reader.ReadLineAsync().AsCancellable(_tokenSource.Token);
-                }
-                catch (OperationCanceledException) { break; }
-                catch (IOException) { break; } 
+                    string line;
+                    try
+                    {
+                        line = await reader.ReadLineAsync().AsCancellable(_tokenSource.Token);
+                    }
+                    catch (OperationCanceledException) { break; }
+                    catch (IOException) { break; } 
 
-                if (line == null) break;
+                    if (line == null) break;
 
-                if (!MessageSerializer.Deserialize(line, out var message))
-                {
-                    SharedLogger.WriteLine($"Received badly formatted message: {Environment.NewLine}{line}.");
-                    continue;
-                }
+                    if (!MessageSerializer.Deserialize(line, out var message))
+                    {
+                        SharedLogger.WriteLine($"Received badly formatted message: {Environment.NewLine}{line}.");
+                        continue;
+                    }
                 
-                OnMessage?.Invoke(message);
-            }
+                    OnMessage?.Invoke(message);
+                }
 
-            OnDisconnected?.Invoke();
+                OnDisconnected?.Invoke();
+            }
+            catch (Exception e)
+            {
+                SharedLogger.WriteLine(e);
+            }
         }
 
         public void Dispose()

@@ -85,6 +85,8 @@ namespace LobbyService
             Leave();
             DisposeOrDeprecate();
             ResetController();
+
+            BroadcastToViews<ILobbyView>(v => v.Reset());
         }
 
         private void DisposeOrDeprecate()
@@ -282,11 +284,15 @@ namespace LobbyService
         public void ConnectView(ILobbyView view)
         {
             if (view == null) return;
+            
+            view.Reset();
+            
             if (_model?.InLobby ?? false)
             {
                 if (view is ILobbyCoreView core) core.DisplayExistingLobby(_model);
                 if (view is ILobbyFriendView friend) friend.DisplayUpdatedFriendList(GetFriends());
             }
+            
             _views.Add(view);
         }
 
@@ -573,7 +579,7 @@ namespace LobbyService
         public void Browse()
         {
             EnsureInitialized();
-            _browser.Browse().LogExceptions();
+            _ = _browser.Browse();
         }
 
         /// <summary>

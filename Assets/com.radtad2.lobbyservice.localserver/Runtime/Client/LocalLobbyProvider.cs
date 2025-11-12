@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LobbyService.LocalServer
 {
@@ -14,7 +15,8 @@ namespace LobbyService.LocalServer
         public override event Action<LobbyDataUpdate> OnLobbyDataUpdated;
         public override event Action<MemberDataUpdate> OnMemberDataUpdated;
         public override event Action<LobbyMember> OnOwnerUpdated;
-        
+
+        private CancellationTokenSource _lifetimeCts;
         private LobbyController _controller;
         public override void Initialize(LobbyController controller)
         {
@@ -29,6 +31,8 @@ namespace LobbyService.LocalServer
             LocalLobby.OnOwnerUpdated += HandleOwnerUpdated;
             
             _controller = controller;
+            
+            _lifetimeCts = new CancellationTokenSource();
         }
 
         public override void Dispose()
@@ -40,6 +44,8 @@ namespace LobbyService.LocalServer
             LocalLobby.OnLobbyDataUpdated -= HandleLobbyDataUpdated;
             LocalLobby.OnMemberDataUpdated -= HandleMemberDataUpdated;
             LocalLobby.OnOwnerUpdated -= HandleOwnerUpdated;
+            
+            _lifetimeCts?.Cancel();
         }
         
         private void EnsureInitialized()
@@ -63,7 +69,7 @@ namespace LobbyService.LocalServer
             var result = await LocalLobby.Create(new CreateLobbyRequest
             {
                 Capacity = request.Capacity
-            });
+            }, token: _lifetimeCts.Token);
 
             if (result.Error is not Error.Ok)
             {
@@ -91,7 +97,7 @@ namespace LobbyService.LocalServer
             var result = await LocalLobby.Join(new JoinLobbyRequest
             {
                 LobbyId = request.LobbyId.ToString()
-            });
+            }, token: _lifetimeCts.Token);
             
             if (result.Error is not Error.Ok)
             {
@@ -235,21 +241,29 @@ namespace LobbyService.LocalServer
             _friendCts = new CancellationTokenSource();
             var cts = CancellationTokenSource.CreateLinkedTokenSource(_friendCts.Token, token);
 
-            _ = FriendLoop(cts.Token);
+             _ = FriendLoop(cts.Token);
         }
 
         private async Task FriendLoop(CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            try
             {
-                var response = await LocalLobby.GetFriends(token: token);
-
-                if (response.Error is Error.Ok)
+                while (!token.IsCancellationRequested)
                 {
-                    FriendsUpdated?.Invoke(response.Response.Friends.ToLobbyMembers());
+                    var response = await LocalLobby.GetFriends(token: token);
+            
+                    if (response.Error is Error.Ok)
+                    {
+                        FriendsUpdated?.Invoke(response.Response.Friends.ToLobbyMembers());
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(_pollingInterval), token);
                 }
-                
-                await Task.Delay(TimeSpan.FromSeconds(_pollingInterval), token);
+            }
+            catch (OperationCanceledException) { /* Ignored */ }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
         

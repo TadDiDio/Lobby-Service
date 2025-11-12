@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LobbyService
 {
@@ -18,11 +19,18 @@ namespace LobbyService
 
         public async Task Browse()
         {
-            _controller.BroadcastToViews<ILobbyBrowserView>(v => v.DisplayStartedBrowsing());
+            try
+            {
+                _controller.BroadcastToViews<ILobbyBrowserView>(v => v.DisplayStartedBrowsing());
 
-            var result = await _browser.Browse();
+                var result = await _browser.Browse();
 
-            _controller.BroadcastToViews<ILobbyBrowserView>(v => v.DisplayBrowsingResult(result));
+                _controller.BroadcastToViews<ILobbyBrowserView>(v => v.DisplayBrowsingResult(result));
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public void AddNumberFilter(LobbyNumberFilter filter)

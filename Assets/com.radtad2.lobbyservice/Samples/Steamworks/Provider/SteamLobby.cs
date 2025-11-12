@@ -703,36 +703,43 @@ namespace LobbyService.Samples.Steam
 
         private async Task DiscoverFriends(CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            try
             {
-                List<LobbyMember> members = new();
-                if (!SteamManager.Initialized)
+                while (!token.IsCancellationRequested)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(_interval), token);
-                    continue;
-                }
-
-                var flags = EFriendFlags.k_EFriendFlagImmediate;
-                var count = SteamFriends.GetFriendCount(flags);
-                var results = new CSteamID[count];
-
-                for (int i = 0; i < count; i++)
-                {
-                    results[i] = SteamFriends.GetFriendByIndex(i, flags);
-                }
-
-                foreach (var id in results)
-                {
-                    var state = SteamFriends.GetFriendPersonaState(id);
-
-                    if (_filter is FriendDiscoveryFilter.All || state is EPersonaState.k_EPersonaStateOnline)
+                    List<LobbyMember> members = new();
+                    if (!SteamManager.Initialized)
                     {
-                        members.Add(new LobbyMember(new ProviderId(id.ToString()), SteamFriends.GetFriendPersonaName(id)));
+                        await Task.Delay(TimeSpan.FromSeconds(_interval), token);
+                        continue;
                     }
-                }
 
-                FriendsUpdated?.Invoke(members);
-                await Task.Delay(TimeSpan.FromSeconds(_interval), token);
+                    var flags = EFriendFlags.k_EFriendFlagImmediate;
+                    var count = SteamFriends.GetFriendCount(flags);
+                    var results = new CSteamID[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        results[i] = SteamFriends.GetFriendByIndex(i, flags);
+                    }
+
+                    foreach (var id in results)
+                    {
+                        var state = SteamFriends.GetFriendPersonaState(id);
+
+                        if (_filter is FriendDiscoveryFilter.All || state is EPersonaState.k_EPersonaStateOnline)
+                        {
+                            members.Add(new LobbyMember(new ProviderId(id.ToString()), SteamFriends.GetFriendPersonaName(id)));
+                        }
+                    }
+
+                    FriendsUpdated?.Invoke(members);
+                    await Task.Delay(TimeSpan.FromSeconds(_interval), token);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
         #endregion
@@ -775,50 +782,58 @@ namespace LobbyService.Samples.Steam
 
         private async Task HeartbeatLoop(ProviderId lobbyId)
         {
-            while (!_heartbeatCts.IsCancellationRequested)
+            try
             {
-                float now = Time.time;
-
-                // Send own heartbeat
-                if (now > _lastHeartbeatTime + _heartbeatIntervalSeconds)
+                while (!_heartbeatCts.IsCancellationRequested)
                 {
-                    Broadcast(
-                        lobbyId,
-                        HeartbeatProcedureKey,
-                        lobbyId.ToString(),
-                        GetLocalUser().Id.ToString()
-                    );
+                    float now = Time.time;
 
-                    _lastHeartbeatTime = now;
-                }
-
-                // Check others' heartbeats
-                var timedOut = new List<LobbyMember>();
-                foreach (var kvp in _heartbeats)
-                {
-                    if (now > kvp.Value.LastPingTime + _heartbeatTimeoutSeconds)
+                    // Send own heartbeat
+                    if (now > _lastHeartbeatTime + _heartbeatIntervalSeconds)
                     {
-                        Debug.Log($"{kvp.Key} timed out because now is {now} and last ping time was {kvp.Value.LastPingTime}");
-                        timedOut.Add(kvp.Key);
+                        Broadcast(
+                            lobbyId,
+                            HeartbeatProcedureKey,
+                            lobbyId.ToString(),
+                            GetLocalUser().Id.ToString()
+                        );
+
+                        _lastHeartbeatTime = now;
                     }
-                }
 
-                foreach (var member in timedOut)
-                {
-                    var senderLobbyId = _heartbeats[member].LobbyId;
-
-                    // Prevent duplicating events for continuously timeout members
-                    UnsubscribeFromHeartbeat(null, member);
-
-                    OnHeartbeatTimeout?.Invoke(new HeartbeatTimeout
+                    // Check others' heartbeats
+                    var timedOut = new List<LobbyMember>();
+                    foreach (var kvp in _heartbeats)
                     {
-                        LobbyId = senderLobbyId,
-                        Member = member
-                    });
-                }
+                        if (now > kvp.Value.LastPingTime + _heartbeatTimeoutSeconds)
+                        {
+                            Debug.Log($"{kvp.Key} timed out because now is {now} and last ping time was {kvp.Value.LastPingTime}");
+                            timedOut.Add(kvp.Key);
+                        }
+                    }
 
-                // How often we test, not how often we broadcast
-                await Task.Delay(TimeSpan.FromSeconds(0.5f));
+                    foreach (var member in timedOut)
+                    {
+                        var senderLobbyId = _heartbeats[member].LobbyId;
+
+                        // Prevent duplicating events for continuously timeout members
+                        UnsubscribeFromHeartbeat(null, member);
+
+                        OnHeartbeatTimeout?.Invoke(new HeartbeatTimeout
+                        {
+                            LobbyId = senderLobbyId,
+                            Member = member
+                        });
+                    }
+
+                    // How often we test, not how often we broadcast
+                    await Task.Delay(TimeSpan.FromSeconds(0.5f), _heartbeatCts.Token);
+                }
+            }
+            catch (OperationCanceledException) { /* Ignored */ }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 

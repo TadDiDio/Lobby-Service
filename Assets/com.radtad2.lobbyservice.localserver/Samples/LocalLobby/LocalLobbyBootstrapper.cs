@@ -21,17 +21,19 @@ namespace LobbyService.LocalServer
             {
                 // Local provider relies on LocalLobby API so wait for that to initialize.
                 if (!await LocalLobby.WaitForInitializationAsync(destroyCancellationToken)) return;
-            
+        
                 var provider = new LocalLobbyProvider();
 
                 // Set the provider in the controller after it is created
                 controller.SetProvider(provider);
-            
+
                 // Handle the view after the provider is set.
                 // A provider must be set before any action can occur on the controller.
-                controller.ConnectView(view);
                 view.SetController(controller);
+            
+                controller.ConnectView(view);
             }
+            catch (OperationCanceledException) { /* Ignored */ }
             catch (Exception e)
             {
                 Debug.LogException(e);

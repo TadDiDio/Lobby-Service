@@ -6,15 +6,6 @@ namespace LobbyService.LocalServer
 {
     public static class Extensions
     {
-        public static void LogExceptions(this Task task)
-        {
-            _ = task.ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                    SharedLogger.WriteLine(t.Exception);
-            }, TaskScheduler.Default);
-        }
-
         public static async Task AsCancellable(this Task task, CancellationToken token)
         {
             var cancelTask = Task.Delay(Timeout.Infinite, token);
