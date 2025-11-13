@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LobbyService
@@ -68,5 +69,13 @@ namespace LobbyService
         /// Sets the interval in seconds to wait before periodically refreshing the friend list.
         /// </summary>
         public void SetInterval(float intervalSeconds) => _provider.SetFriendPollingInterval(intervalSeconds);
+        
+        /// <summary>
+        /// Gets the avatar associated with a lobby member.
+        /// </summary>
+        /// <param name="member">The member to get for.</param>
+        /// <param name="token">A token to cancel the request.</param>
+        /// <returns>The image.</returns>
+        public async Task<Texture2D> GetFriendAvatar(LobbyMember member, CancellationToken token = default) => await _provider.GetFriendAvatar(member, token);
     }
 }

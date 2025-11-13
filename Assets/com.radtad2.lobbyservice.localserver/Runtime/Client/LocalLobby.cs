@@ -169,6 +169,7 @@ namespace LobbyService.LocalServer
             switch (evt)
             {
                 case OtherMemberJoinedEvent joined:
+                    Debug.Log(joined.Member.ToLobbyMember() + " joined");
                     OnOtherMemberJoined?.Invoke(new MemberJoinedInfo
                     {
                         Member = joined.Member.ToLobbyMember(),
@@ -176,6 +177,7 @@ namespace LobbyService.LocalServer
                     });
                     break;
                 case OtherMemberLeftEvent left:
+                    Debug.Log(left.Member.ToLobbyMember() + " left");
                     OnOtherMemberLeft?.Invoke(new LeaveInfo
                     {
                         Member = left.Member.ToLobbyMember(),
@@ -237,7 +239,11 @@ namespace LobbyService.LocalServer
         
         public static async Task<RequestResponse<EnterResponse>> Join(JoinLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
         {
-            return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
+            var response = await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
+
+            if (response.Error is Error.Ok) CacheSnapshot(response.Response.Snapshot);
+            
+            return response;
         }
 
         public static void Leave(LeaveLobbyRequest request)

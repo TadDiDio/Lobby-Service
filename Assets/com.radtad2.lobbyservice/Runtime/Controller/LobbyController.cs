@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -141,7 +142,7 @@ namespace LobbyService
             _provider.Initialize(this);
             _joinOperations.Add(_provider.GetHashCode(), new List<Task>());
 
-            if (_staleLobbyManager.TryGetStaleId(_provider.GetType(), out ProviderId staleId))
+            if (_provider.ShouldAutoLeaveOnCreation() && _staleLobbyManager.TryGetStaleId(_provider.GetType(), out ProviderId staleId))
             {
                 _provider.Leave(staleId);
                 _staleLobbyManager.EraseId(_provider.GetType());
@@ -182,7 +183,10 @@ namespace LobbyService
         #region Coordination
         private void OnLocalMemberEnteredLobby(bool asOwner, ProviderId lobbyId)
         {
-            _staleLobbyManager.RecordId(_provider.GetType(), lobbyId);
+            if (_provider.ShouldAutoLeaveOnCreation())
+            {
+                _staleLobbyManager.RecordId(_provider.GetType(), lobbyId);
+            }
 
             OnEnteredLobby?.Invoke();
 
@@ -206,7 +210,11 @@ namespace LobbyService
             OnLeftLobby?.Invoke();
 
             _heartbeat?.StopHeartbeatAndClearSubscriptions();
-            _staleLobbyManager.EraseId(_provider.GetType());
+
+            if (_provider.ShouldAutoLeaveOnCreation())
+            {
+                _staleLobbyManager.EraseId(_provider.GetType());
+            }
         }
         private void OnLocalOwnershipChanged(bool gainedOwnership)
         {
@@ -535,6 +543,19 @@ namespace LobbyService
             return _friends?.GetFriends() ?? new List<LobbyMember>();
         }
 
+        /// <summary>
+        /// Gets the avatar associated with a lobby member.
+        /// </summary>
+        /// <param name="member">The member to get for.</param>
+        /// <param name="token">A token to cancel the request.</param>
+        /// <returns>The image.</returns>
+        public async Task<Texture2D> GetFriendAvatar(LobbyMember member, CancellationToken token = default)
+        {
+            EnsureInitialized();
+            
+            if (_friends == null) return null;
+            return await _friends.GetFriendAvatar(member, token);
+        }
         #endregion
 
         #region Chat

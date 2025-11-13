@@ -22,6 +22,11 @@ namespace LobbyService
         /// </summary>
         public void MarkObsolete() => _obsolete = true;
 
+        /// <summary>
+        /// Whether this provider should automatically attempt to leave a stale lobby if one exists when being created.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool ShouldAutoLeaveOnCreation() => true;
 
         #region Events
         /// <summary>

@@ -6,6 +6,7 @@ namespace LobbyService.LocalServer
         Serialization = 1,
         Timeout = 2,
         Cancelled = 3,
-        Unknown,
+        InvalidId = 4,
+        Unknown = 5,
     }
 }

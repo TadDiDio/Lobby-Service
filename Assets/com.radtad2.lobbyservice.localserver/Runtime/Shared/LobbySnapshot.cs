@@ -11,6 +11,6 @@ namespace LobbyService.LocalServer
         public LocalLobbyType LobbyType { get; set; }
         public IReadOnlyList<LocalLobbyMember> Members { get; set; }
         public IReadOnlyDictionary<string, string> LobbyData { get; set; }
-        public IReadOnlyDictionary<LocalLobbyMember, Dictionary<string, string>> MemberData { get; set; }
+        public IReadOnlyDictionary<Guid, Dictionary<string, string>> MemberData { get; set; }
     }
 }

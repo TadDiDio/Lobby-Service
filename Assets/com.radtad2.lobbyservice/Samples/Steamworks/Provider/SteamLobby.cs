@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LobbyService;
 using LobbyService.Heartbeat;
 using LobbyService.Procedure;
 using Steamworks;
@@ -699,6 +698,39 @@ namespace LobbyService.Samples.Steam
             _friendCts?.Cancel();
             _friendCts?.Dispose();
             _friendCts = null;
+        }
+
+        public async Task<Texture2D> GetFriendAvatar(LobbyMember member, CancellationToken token = default)
+        {
+            if (!SteamManager.Initialized)
+            {
+                Debug.LogError("Using steam lobby provider but steam is not initialized.");
+                return null;
+            }
+            
+            if (!ValidSteamId(member.Id, out var id)) return null;
+
+            int handle = SteamFriends.GetMediumFriendAvatar(id);
+            
+            if (!SteamUtils.GetImageSize(handle, out uint width, out uint height))
+            {
+                Debug.LogError("Failed to get image size for avatar.");
+                return null;
+            }
+            
+            var imageBuffer = new byte[width * height * 4];
+            if (!SteamUtils.GetImageRGBA(handle, imageBuffer, (int)(width * height * 4)))
+            {
+                Debug.LogError("Failed to get RGBA data for avatar.");
+                return null;
+            }
+
+            var texture = new Texture2D((int)width, (int)height, TextureFormat.RGBA32, false);
+            texture.LoadRawTextureData(imageBuffer);
+            texture.Apply();
+
+            await Task.CompletedTask;
+            return texture;
         }
 
         private async Task DiscoverFriends(CancellationToken token)

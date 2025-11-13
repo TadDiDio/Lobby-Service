@@ -47,6 +47,8 @@ namespace LobbyService.LocalServer
             
             _lifetimeCts?.Cancel();
         }
+
+        public override bool ShouldAutoLeaveOnCreation() => false;
         
         private void EnsureInitialized()
         {
@@ -86,7 +88,7 @@ namespace LobbyService.LocalServer
                 snapshot.LobbyType.ToLobbyType(),
                 snapshot.Members.ToLobbyMembers(),
                 snapshot.LobbyData.ToMeta(),
-                snapshot.MemberData.ToMemberData()
+                snapshot.MemberData.ToMemberData(snapshot.Members)
             );
         }
 
@@ -114,7 +116,7 @@ namespace LobbyService.LocalServer
                 snapshot.LobbyType.ToLobbyType(),
                 snapshot.Members.ToLobbyMembers(),
                 snapshot.LobbyData.ToMeta(),
-                snapshot.MemberData.ToMemberData()
+                snapshot.MemberData.ToMemberData(snapshot.Members)
             );
         }
 
@@ -280,7 +282,13 @@ namespace LobbyService.LocalServer
             _friendCts?.Dispose();
             _friendCts = null;
         }
-        
+
+        public async Task<Texture2D> GetFriendAvatar(LobbyMember member, CancellationToken token = default)
+        {
+            await Task.CompletedTask;
+            return Texture2D.whiteTexture;
+        }
+
         #endregion
     }
 }

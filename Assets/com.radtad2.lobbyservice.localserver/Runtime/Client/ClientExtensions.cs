@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace LobbyService.LocalServer
 {
@@ -37,7 +38,7 @@ namespace LobbyService.LocalServer
             
             return meta;
         }
-        public static Dictionary<LobbyMember, Metadata> ToMemberData(this IReadOnlyDictionary<LocalLobbyMember, Dictionary<string, string>> data)
+        public static Dictionary<LobbyMember, Metadata> ToMemberData(this IReadOnlyDictionary<Guid, Dictionary<string, string>> data, IReadOnlyList<LocalLobbyMember> members)
         {
             var result = new Dictionary<LobbyMember, Metadata>();
             
@@ -50,7 +51,15 @@ namespace LobbyService.LocalServer
                     meta.Set(kvp2.Key, kvp2.Value);
                 }
                 
-                result[kvp.Key.ToLobbyMember()] = meta;
+                var member = members.FirstOrDefault(m => m.Id == kvp.Key)?.ToLobbyMember();
+
+                if (member == null)
+                {
+                    Debug.LogError($"Could not find member {kvp.Key}");
+                    continue;
+                }
+                
+                result[member] = meta;
             }
             
             return result;

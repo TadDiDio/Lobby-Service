@@ -20,8 +20,10 @@ namespace LobbyService.LocalServer
         public override int GetHashCode() => Id.GetHashCode();
         public static bool operator ==(LocalLobbyMember left, LocalLobbyMember right) => EqualityComparer<LocalLobbyMember>.Default.Equals(left, right);
         public static bool operator !=(LocalLobbyMember left, LocalLobbyMember right) => !(left == right);
+
         public override string ToString() => DisplayName;
 
         public LocalLobbyMember Copy() => new(Id, DisplayName);
+
     }
 }

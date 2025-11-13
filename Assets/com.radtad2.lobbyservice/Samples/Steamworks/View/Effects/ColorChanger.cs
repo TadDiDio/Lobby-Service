@@ -22,6 +22,7 @@ namespace LobbyService.Samples.Steam
             h %= 1;
             
             _image.color = Color.HSVToRGB(h, s, v);
+            _image.color *= new Color(1, 1, 1, 0.4f);
         }
     }
 }

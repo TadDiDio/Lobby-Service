@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LobbyService
 {
@@ -36,5 +38,13 @@ namespace LobbyService
         /// Stops polling for friends.
         /// </summary>
         public void StopFriendPolling();
+
+        /// <summary>
+        /// Gets the avatar associated with a lobby member.
+        /// </summary>
+        /// <param name="member">The member to get for.</param>
+        /// <param name="token">A token to cancel the request.</param>
+        /// <returns>The image.</returns>
+        public Task<Texture2D> GetFriendAvatar(LobbyMember member, CancellationToken token = default);
     }
 }

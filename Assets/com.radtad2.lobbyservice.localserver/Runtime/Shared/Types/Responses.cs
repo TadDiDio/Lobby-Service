@@ -4,7 +4,7 @@ namespace LobbyService.LocalServer
 {
     public interface IResponse { }
 
-    public class DummyResponse : IResponse { }
+    public class NullResponse : IResponse { }
     
     public class WelcomeResponse : IResponse
     {
