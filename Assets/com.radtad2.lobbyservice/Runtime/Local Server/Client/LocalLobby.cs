@@ -186,6 +186,7 @@ namespace LobbyService.LocalServer
                     });
                     break;
                 case LocalMemberKickedEvent kicked:
+                    Debug.Log("Kicked!");
                     OnLocalMemberKicked?.Invoke(new KickInfo
                     {
                         Reason = (KickReason)kicked.KickReason
@@ -258,27 +259,27 @@ namespace LobbyService.LocalServer
 
         public static void CloseLobby(CloseLobbyRequest request)
         {
-            
+            SendCommand(request);
         }
 
         public static void SetOwner(SetOwnerRequest request)
         {
-            
+            SendCommand(request);
         }
 
         public static void KickMember(KickMemberRequest request)
         {
-            
+            SendCommand(request);
         }
 
         public static void SetLobbyData(LobbyDataRequest request)
         {
-            
+            SendCommand(request);
         }
 
         public static void SetMemberData(MemberDataRequest request)
         {
-            
+            SendCommand(request);
         }
 
         public static string GetLobbyDataOrDefault(string lobbyId, string key, string defaultValue)

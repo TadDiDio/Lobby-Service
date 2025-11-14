@@ -21,6 +21,16 @@ namespace LobbyService.LocalServer
                 _                         => throw new ArgumentOutOfRangeException()
             };
         }
+        
+        public static LocalLobbyType ToLocalLobbyType(this LobbyType type)
+        {
+            return type switch
+            {
+               LobbyType.Public     => LocalLobbyType.Public,
+               LobbyType.InviteOnly => LocalLobbyType.InviteOnly,
+                _                   => throw new ArgumentOutOfRangeException()
+            };
+        }
 
         public static List<LobbyMember> ToLobbyMembers(this IReadOnlyList<LocalLobbyMember> members)
         {

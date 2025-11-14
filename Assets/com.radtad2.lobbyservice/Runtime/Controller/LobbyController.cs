@@ -14,6 +14,33 @@ namespace LobbyService
     /// </summary>
     public class LobbyController : MonoBehaviour
     {
+        public ICoreModule CoreModule { get; private set; }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         [SerializeField] private LobbyRules rules;
         public LobbyRules Rules => rules;
 

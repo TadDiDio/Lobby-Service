@@ -10,9 +10,20 @@ namespace LobbyService.LocalServer
     {
         public TMP_Text memberName;
         public RawImage avatarImage;
+        public Button kickButton;
+        public Image ownerCrown;
         
+        public LobbyMember Member;
+        
+        private void Awake()
+        {
+            kickButton.gameObject.SetActive(false);
+            ownerCrown.gameObject.SetActive(false);
+        }
+
         public void Initialize(LobbyController controller, LobbyMember member)
         {
+            Member = member;
             memberName.text = member.DisplayName;
             _ = GetAvatar(controller, member);
         }
@@ -28,6 +39,17 @@ namespace LobbyService.LocalServer
             {
                 Debug.LogException(e);
             }
+        }
+
+        public Button EnableKickButton(bool buttonEnabled)
+        {
+            kickButton.gameObject.SetActive(buttonEnabled);
+            return kickButton;
+        }
+
+        public void SetOwner(bool isOwner)
+        {
+            ownerCrown.gameObject.SetActive(isOwner);
         }
     }
 }

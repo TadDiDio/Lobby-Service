@@ -70,7 +70,9 @@ namespace LobbyService.LocalServer
             
             var result = await LocalLobby.Create(new CreateLobbyRequest
             {
-                Capacity = request.Capacity
+                Capacity = request.Capacity,
+				Name = request.Name,
+                LobbyType = request.LobbyType.ToLocalLobbyType()
             }, token: _lifetimeCts.Token);
 
             if (result.Error is not Error.Ok)
@@ -171,6 +173,8 @@ namespace LobbyService.LocalServer
         public override bool KickMember(ProviderId lobbyId, LobbyMember member)
         {
             EnsureInitialized();
+
+            if (!_controller.IsOwner) return false;
             
             LocalLobby.KickMember(new KickMemberRequest
             {
@@ -178,7 +182,7 @@ namespace LobbyService.LocalServer
                 KickeeId = member.Id.ToString()
             });
             
-            return false;
+            return true;
         }
 
         public override bool SetLobbyData(ProviderId lobbyId, string key, string value)

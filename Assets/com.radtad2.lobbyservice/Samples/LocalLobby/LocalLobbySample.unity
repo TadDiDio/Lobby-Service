@@ -1341,7 +1341,7 @@ MonoBehaviour:
     NameAutoLobbyAfterUser: 1
     AutoLobbyCreateRequest:
       Name: 
-      Capacity: 8
+      Capacity: 4
       LobbyType: 1
 --- !u!1 &943505345
 GameObject:

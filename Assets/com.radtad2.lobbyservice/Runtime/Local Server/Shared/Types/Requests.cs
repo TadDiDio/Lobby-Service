@@ -8,6 +8,8 @@ namespace LobbyService.LocalServer
     public class CreateLobbyRequest : IRequest
     {
         public int Capacity { get; set; }
+        public string Name { get; set; }
+        public LocalLobbyType LobbyType { get; set; }
     }
     
     public class JoinLobbyRequest : IRequest

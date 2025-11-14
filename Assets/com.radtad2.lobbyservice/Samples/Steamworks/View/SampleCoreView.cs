@@ -75,6 +75,17 @@ namespace LobbyService.Samples.Steam
         {
             var card = Instantiate(memberCardPrefab, memberCardContainer.transform);
             card.Initialize(_controller, member);
+
+            if (_controller.IsOwner && _controller.LocalMember != member)
+            {
+                card.EnableKickButton(true).onClick.AddListener(() =>
+                {
+                    _controller.KickMember(member);
+                });
+            }
+            
+            card.SetOwner(member == _controller.Model.Owner);
+            
             _members.Add(member, card);
         }
         
@@ -84,7 +95,7 @@ namespace LobbyService.Samples.Steam
             {
                 Capacity = (int)capacitySlider.value,
                 LobbyType =  LobbyType.Public,
-                Name = nameInput.text
+                Name = string.IsNullOrWhiteSpace(nameInput.text) ? $"{_controller.LocalMember.DisplayName}'s Lobby" : nameInput.text
             });
         }
 
@@ -125,7 +136,7 @@ namespace LobbyService.Samples.Steam
             if (!result.Success) return;
 
             AddMember(result.LocalMember);
-            lobbyNameText.text = $"{result.LocalMember.DisplayName}'s lobby";
+            lobbyNameText.text = result.LobbyData.GetOrDefault(LobbyKeys.NameKey, "New lobby");
         }
 
         public void DisplayJoinRequested(JoinLobbyRequest request)
@@ -142,12 +153,19 @@ namespace LobbyService.Samples.Steam
                 AddMember(member);
             }
             
-            lobbyNameText.text = $"{result.LocalMember.DisplayName}'s lobby";
+            lobbyNameText.text = result.LobbyData.GetOrDefault(LobbyKeys.NameKey, "New lobby");
         }
 
         public void DisplayLocalMemberLeft(LeaveInfo info)
         {
-            Reset();
+            localUserText.text = $"You are {_controller.LocalMember.DisplayName}";
+            lobbyNameText.text = "Create or join a lobby";
+
+            foreach (var member in _members.Values)
+            {
+                Destroy(member.gameObject);
+            }
+            _members.Clear();
         }
 
         public void DisplaySendInvite(InviteSentInfo info)
@@ -169,6 +187,7 @@ namespace LobbyService.Samples.Steam
         
         public void DisplayOtherMemberLeft(LeaveInfo info)
         {
+            if (info.LeaveReason is LeaveReason.Kicked) Debug.Log($"{info.Member} was Kicked");
             if (!_members.TryGetValue(info.Member, out var card)) return;
             
             Destroy(card.gameObject);
@@ -177,7 +196,16 @@ namespace LobbyService.Samples.Steam
 
         public void DisplayUpdateOwner(LobbyMember newOwner)
         {
-            Debug.Log($"{newOwner} is the new owner");
+            foreach (var card in _members.Values)
+            {
+                card.SetOwner(newOwner == card.Member);
+                var button = card.EnableKickButton(_controller.IsOwner);
+
+                if (_controller.IsOwner && _controller.LocalMember != card.Member)
+                {
+                    button.onClick.AddListener(() => _controller.KickMember(card.Member));
+                }
+            }
         }
 
         public void DisplayUpdateLobbyData(LobbyDataUpdate update)

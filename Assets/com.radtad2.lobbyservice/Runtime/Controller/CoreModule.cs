@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace LobbyService
 {
-    public class CoreModule : IDisposable
+    public class CoreModule : ICoreModule, IDisposable
     {
         private LobbyModel _model;
         private LobbyController _controller;
         private BaseLobbyProvider _provider;
         private LobbyStateMachine _stateMachine;
-
+        
         /// <summary>
         /// Invoked when the user has entered a lobby. Params tell if they are the owner and the lobby id.
         /// </summary>
