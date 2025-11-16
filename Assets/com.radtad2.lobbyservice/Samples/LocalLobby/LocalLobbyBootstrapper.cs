@@ -7,7 +7,7 @@ namespace LobbyService.LocalServer
 {
     public class LocalLobbyBootstrapper : MonoBehaviour
     {
-        [SerializeField] private SampleCoreView view;
+        [SerializeField] private Sample view;
         [SerializeField] private LobbyController controller;
         
         private void Start()
@@ -22,7 +22,7 @@ namespace LobbyService.LocalServer
                 // Local provider relies on LocalLobby API so wait for that to initialize.
                 if (!await LocalLobby.WaitForInitializationAsync(destroyCancellationToken)) return;
         
-                var provider = new LocalLobbyProvider();
+                var provider = new LocalProvider();
 
                 // Set the provider in the controller after it is created
                 controller.SetProvider(provider);

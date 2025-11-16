@@ -2,7 +2,6 @@ namespace LobbyService
 {
     public interface ILobbySorter
     {
-
         /// <summary>
         /// Tells if a is greater than b.
         /// </summary>

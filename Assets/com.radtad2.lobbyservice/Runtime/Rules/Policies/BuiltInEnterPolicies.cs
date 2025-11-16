@@ -8,10 +8,10 @@ namespace LobbyService
     /// </summary>
     public class LeaveThenCreateJoinPolicy : IEnterRequestedWhileInLobbyPolicy<CreateLobbyRequest>
     {
-        public async Task Execute(CoreModule core, CreateLobbyRequest request, ProviderId currentLobbyId)
+        public bool Execute(LobbyController controller, CreateLobbyRequest request, ProviderId currentLobbyId)
         {
-            core.Leave();
-            await core.CreateLobbyAsync(request, 0);
+            controller.Leave();
+            return true;
         }
     }
 
@@ -20,10 +20,7 @@ namespace LobbyService
     /// </summary>
     public class ProhibitCreatePolicy : IEnterRequestedWhileInLobbyPolicy<CreateLobbyRequest>
     {
-        public async Task Execute(CoreModule core, CreateLobbyRequest request, ProviderId currentLobbyId)
-        {
-            await Task.CompletedTask;
-        }
+        public bool Execute(LobbyController controller, CreateLobbyRequest request, ProviderId currentLobbyId) => false;
     }
     #endregion
 
@@ -33,10 +30,10 @@ namespace LobbyService
     /// </summary>
     public class LeaveThenJoinJoinPolicy : IEnterRequestedWhileInLobbyPolicy<JoinLobbyRequest>
     {
-        public async Task Execute(CoreModule core, JoinLobbyRequest request, ProviderId currentLobbyId)
+        public bool Execute(LobbyController controller, JoinLobbyRequest request, ProviderId currentLobbyId)
         {
-            core.Leave();
-            await core.JoinLobbyAsync(request, 0);
+            controller.Leave();
+            return true;
         }
     }
 
@@ -45,10 +42,7 @@ namespace LobbyService
     /// </summary>
     public class ProhibitJoinPolicy : IEnterRequestedWhileInLobbyPolicy<JoinLobbyRequest>
     {
-        public async Task Execute(CoreModule core, JoinLobbyRequest request, ProviderId currentLobbyId)
-        {
-            await Task.CompletedTask;
-        }
+        public bool Execute(LobbyController controller, JoinLobbyRequest request, ProviderId currentLobbyId) => false;
     }
     #endregion
 }
