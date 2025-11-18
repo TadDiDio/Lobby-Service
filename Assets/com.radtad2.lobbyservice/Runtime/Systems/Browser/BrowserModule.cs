@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LobbyService
 {
-    public class BrowserModule : IBrowserAPIInternal, IDisposable
+    public class BrowserModule : IBrowserAPIInternal
     {
         private IBrowserView _viewBus;
         private IBrowserProvider _browser;

@@ -50,7 +50,7 @@ namespace LobbyService
         /// <summary>
         /// The browser capabilities.
         /// </summary>
-        public IBrowserAPI Browser { get; private set; }
+        public IBrowserAPIInternal Browser { get; private set; }
         
         /// <summary>
         /// The capabilities of the currently configured provider.
@@ -158,7 +158,7 @@ namespace LobbyService
             ConstructCapabilities();
             
             _provider.Initialize(this);
-            _viewModule.Reset(Capabilities);
+            _viewModule.ResetView(Capabilities);
             
             if (_provider.ShouldFlushStaleLobbies() && _staleLobbyManager.TryGetStaleId(_provider.GetType(), out var staleId))
             {

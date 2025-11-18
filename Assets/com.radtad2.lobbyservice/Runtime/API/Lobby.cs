@@ -1,9 +1,11 @@
 using System;
+using UnityEngine;
 
 namespace LobbyService
 {
     public static class Lobby
     {
+        public static bool Initialized = false;
         public static IBrowserAPI Browser { get; private set; }
         public static IFriendAPI Friends { get; private set; }
         public static IChatAPI Chat { get; private set; }
@@ -14,20 +16,27 @@ namespace LobbyService
         
         public static void Initialize(IPreInitStrategy strategy = null)
         {
+            if (Initialized) return;
+            
             if (strategy != null) _preInitStrategy = strategy;
             
-            var browser = ModuleProxyFactory.Create<IBrowserAPIInternal>(_preInitStrategy);
-            browser.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
-            browser.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
-            Browser = browser;
+            var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_preInitStrategy);
+            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
+            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
+            Browser = browserProxy;
             
             Friends = ModuleProxyFactory.Create<IFriendAPI>(_preInitStrategy);
             Chat =  ModuleProxyFactory.Create<IChatAPI>(_preInitStrategy);
             Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_preInitStrategy);
+            
+            Initialized = true;
         }
 
         public static void Shutdown()
         {
+            if (!Initialized) return;
+            
+            Initialized = false;
             _preInitStrategy = new DropPreInitStrategy();
             if (_controller == null) return;
             _controller.Dispose();
@@ -44,12 +53,18 @@ namespace LobbyService
             _controller = controller;
             
             // ReSharper disable SuspiciousTypeConversion.Global
-            ((ModuleProxy<IBrowserAPI>)Browser)?.AttachTarget(_controller.Browser);
+            ((ModuleProxy<IBrowserAPIInternal>)Browser)?.AttachTarget(_controller.Browser);
             ((ModuleProxy<IFriendAPI>)Friends).AttachTarget(_controller.Friends);
             ((ModuleProxy<IChatAPI>)Chat).AttachTarget(_controller.Chat);
             ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
             // ReSharper restore SuspiciousTypeConversion.Global
         }
+
+        /// <summary>
+        /// Safely sets a new provider for the controller. 
+        /// </summary>
+        /// <param name="newProvider">The new provider.</param>
+        public static void SetProvider(BaseProvider newProvider) => Dispatch(() => _controller.SetProvider(newProvider));
             
         #region Core
         private static void Dispatch(Action call)
@@ -92,14 +107,14 @@ namespace LobbyService
         /// </summary>
         /// <param name="newOwner">The lobby member to promote.</param>
         /// <remarks>You must be the current owner to do this.</remarks>
-        public static void RequestSetOwner(LobbyMember newOwner) =>  Dispatch(() => _controller.SetOwner(newOwner));
+        public static void SetOwner(LobbyMember newOwner) =>  Dispatch(() => _controller.SetOwner(newOwner));
 
         /// <summary>
         /// Tries to kick a member.
         /// </summary>
         /// <param name="member">The lobby member to kick.</param>
         /// <remarks>You must be the current owner to do this.</remarks>
-        public static void RequestKickMember(LobbyMember member) => Dispatch(() => _controller.KickMember(member));
+        public static void KickMember(LobbyMember member) => Dispatch(() => _controller.KickMember(member));
 
         /// <summary>
         /// Tries to set metadata for the lobby.

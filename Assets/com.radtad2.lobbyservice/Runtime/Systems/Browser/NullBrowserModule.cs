@@ -3,7 +3,7 @@ namespace LobbyService
     /// <summary>
     /// Safely no-ops all operations.
     /// </summary>
-    public class NullBrowserModule : IBrowserAPI
+    public class NullBrowserModule : IBrowserAPIInternal
     {
         public NullBrowserModule(IBrowserFilterAPI filter, IBrowserSorterAPI sorter)
         {
@@ -11,8 +11,8 @@ namespace LobbyService
             Sorter = sorter;
         }
         
-        public IBrowserFilterAPI Filter { get; } 
-        public IBrowserSorterAPI Sorter { get; }
+        public IBrowserFilterAPI Filter { get; set; }
+        public IBrowserSorterAPI Sorter { get; set; }
         public void Browse() { }
         public void Dispose() { }
     }

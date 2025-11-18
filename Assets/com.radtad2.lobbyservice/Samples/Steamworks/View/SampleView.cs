@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using LobbyService.LocalServer;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -34,14 +33,8 @@ namespace LobbyService.Samples.Steam
 
         private LobbyInvite? _invite;
         
-        private LobbyController _controller;
         private Dictionary<LobbyMember, MemberCard> _members = new();
         
-        public void SetController(LobbyController controller)
-        {
-            _controller = controller;
-        }
-
         private void Awake()
         {
             createButton.onClick.AddListener(Create);
@@ -74,28 +67,28 @@ namespace LobbyService.Samples.Steam
         private void AddMember(LobbyMember member)
         {
             var card = Instantiate(memberCardPrefab, memberCardContainer.transform);
-            card.Initialize(_controller, member);
+            card.Initialize(member);
 
-            if (_controller.IsOwner && _controller.LocalMember != member)
+            if (Lobby.IsOwner && Lobby.LocalMember != member)
             {
                 card.EnableKickButton(true).onClick.AddListener(() =>
                 {
-                    _controller.KickMember(member);
+                    Lobby.KickMember(member);
                 });
             }
             
-            card.SetOwner(member == _controller.Model.Owner);
+            card.SetOwner(member == Lobby.Model.Owner);
             
             _members.Add(member, card);
         }
         
         private void Create()
         {
-            _controller?.Create(new CreateLobbyRequest
+            Lobby.Create(new CreateLobbyRequest
             {
                 Capacity = (int)capacitySlider.value,
                 LobbyType =  LobbyType.Public,
-                Name = string.IsNullOrWhiteSpace(nameInput.text) ? $"{_controller.LocalMember.DisplayName}'s Lobby" : nameInput.text
+                Name = string.IsNullOrWhiteSpace(nameInput.text) ? $"{Lobby.LocalMember.DisplayName}'s Lobby" : nameInput.text
             });
         }
 
@@ -104,7 +97,7 @@ namespace LobbyService.Samples.Steam
             invitePanel.SetActive(false);
             if (!_invite.HasValue) return;
             
-            _controller.Join(new JoinLobbyRequest
+            Lobby.Join(new JoinLobbyRequest
             {
                 LobbyId = _invite.Value.LobbyId
             });
@@ -118,7 +111,7 @@ namespace LobbyService.Samples.Steam
         
         public void Leave()
         {
-            _controller?.Leave();
+            Lobby.Leave();
         }
         
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
@@ -158,7 +151,7 @@ namespace LobbyService.Samples.Steam
 
         public void DisplayLocalMemberLeft(LeaveInfo info)
         {
-            localUserText.text = $"You are {_controller.LocalMember.DisplayName}";
+            localUserText.text = $"You are {Lobby.LocalMember.DisplayName}";
             lobbyNameText.text = "Create or join a lobby";
 
             foreach (var member in _members.Values)
@@ -199,11 +192,11 @@ namespace LobbyService.Samples.Steam
             foreach (var card in _members.Values)
             {
                 card.SetOwner(newOwner == card.Member);
-                var button = card.EnableKickButton(_controller.IsOwner);
+                var button = card.EnableKickButton(Lobby.IsOwner);
 
-                if (_controller.IsOwner && _controller.LocalMember != card.Member)
+                if (Lobby.IsOwner && Lobby.LocalMember != card.Member)
                 {
-                    button.onClick.AddListener(() => _controller.KickMember(card.Member));
+                    button.onClick.AddListener(() => Lobby.KickMember(card.Member));
                 }
             }
         }
@@ -222,10 +215,9 @@ namespace LobbyService.Samples.Steam
         {
             public GameObject Card;
             public LobbyMember Member;
-            public LobbyController Controller;
             public void Invite()
             {
-                Controller.SendInvite(Member);
+                Lobby.SendInvite(Member);
             }
             public void Destroy()
             {
@@ -246,7 +238,6 @@ namespace LobbyService.Samples.Steam
                 {
                     Card = Instantiate(friendCardPrefab, friendContainer.transform),
                     Member = friend,
-                    Controller = _controller
                 };
 
                 card.Card.GetComponentInChildren<TMP_Text>().text = $"Invite {friend} to lobby";
@@ -260,9 +251,9 @@ namespace LobbyService.Samples.Steam
             
         }
 
-        public void Reset(ILobbyCapabilities capabilities)
+        public void ResetView(ILobbyCapabilities capabilities)
         {
-            localUserText.text = $"You are {_controller.LocalMember.DisplayName}";
+            localUserText.text = $"You are {Lobby.LocalMember.DisplayName}";
             lobbyNameText.text = "Create or join a lobby";
 
             foreach (var member in _members.Values)

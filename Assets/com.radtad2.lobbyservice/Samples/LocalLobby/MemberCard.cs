@@ -19,7 +19,7 @@ namespace LobbyService.LocalServer
             ownerCrown.gameObject.SetActive(false);
         }
 
-        public void Initialize(LobbyController controller, LobbyMember member)
+        public void Initialize(LobbyMember member)
         {
             Member = member;
             memberName.text = member.DisplayName;

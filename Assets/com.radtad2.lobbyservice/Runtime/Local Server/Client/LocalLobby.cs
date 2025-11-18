@@ -34,6 +34,8 @@ namespace LobbyService.LocalServer
         
         private static async Task<bool> InitializeAsync(CancellationToken token)
         {
+            if (Initialized) return true;
+            
             try
             {
                 ConsoleRedirector.Redirect();
@@ -77,6 +79,10 @@ namespace LobbyService.LocalServer
 
         public static void Shutdown()
         {
+            if (!Initialized) return;
+            
+            Initialized = false;
+            
             if (_shutdownCts is { IsCancellationRequested: false })
             {
                 _shutdownCts.Cancel();

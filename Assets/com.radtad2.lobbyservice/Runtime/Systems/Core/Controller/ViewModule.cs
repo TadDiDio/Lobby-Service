@@ -22,7 +22,7 @@ namespace LobbyService
             if (view == null) return;
             
             _views.Add(view);
-            view.Reset(_controller.Capabilities);
+            view.ResetView(_controller.Capabilities);
             
             if (_controller.Model.InLobby)
             {
@@ -48,9 +48,9 @@ namespace LobbyService
             }
         }
         
-        public void Reset(ILobbyCapabilities capabilities)
+        public void ResetView(ILobbyCapabilities capabilities)
         {
-            Display<IView>(v => v.Reset(capabilities));
+            Display<IView>(v => v.ResetView(capabilities));
         }
 
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
