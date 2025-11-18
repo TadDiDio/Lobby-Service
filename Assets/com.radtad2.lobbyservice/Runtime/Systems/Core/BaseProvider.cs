@@ -27,11 +27,29 @@ namespace LobbyService
         public virtual bool ShouldFlushStaleLobbies() => true;
 
         #region Extra Modules
-
+        /// <summary>
+        /// An optional heartbeat module. Leave null if not supported.
+        /// </summary>
         public abstract IHeartbeatProvider Heartbeat { get; }
+
+        /// <summary>
+        /// An optional browser module. Leave null if not supported.
+        /// </summary>
         public abstract IBrowserProvider Browser { get; }
+
+        /// <summary>
+        /// An optional friends module. Leave null if not supported.
+        /// </summary>
         public abstract IFriendProvider  Friends { get; }
+        
+        /// <summary>
+        /// An optional chat module. Leave null if not supported.
+        /// </summary>
         public abstract IChatProvider Chat { get; }
+        
+        /// <summary>
+        /// An optional remote procedure module. Leave null if not supported.
+        /// </summary>
         public abstract IProcedureProvider Procedures { get; }
         
         #endregion
@@ -177,6 +195,21 @@ namespace LobbyService
         public abstract string GetMemberData(ProviderId lobbyId, LobbyMember member, string key, string defaultValue);
         #endregion
 
-        public abstract void Dispose();
+        /// <summary>
+        /// Called when the provider is disposed. Use this to dispose core resources. Dispose is called on all
+        /// optional modules so no need to manually dispose those.
+        /// </summary>
+        public abstract void DisposeThis();
+        
+        public void Dispose()
+        {
+            Heartbeat?.Dispose();
+            Browser?.Dispose();
+            Friends?.Dispose();
+            Chat?.Dispose();
+            Procedures?.Dispose();
+            
+            DisposeThis();
+        }
     }
 }

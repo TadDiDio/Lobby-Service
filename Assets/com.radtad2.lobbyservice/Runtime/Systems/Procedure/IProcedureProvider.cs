@@ -1,8 +1,9 @@
+using System;
 using LobbyService.Procedure;
 
 namespace LobbyService
 {
-    public interface IProcedureProvider
+    public interface IProcedureProvider : IDisposable
     {
         /// <summary>
         /// Registers a procedure by key to be invoked on connected members. Late arriving members should have the

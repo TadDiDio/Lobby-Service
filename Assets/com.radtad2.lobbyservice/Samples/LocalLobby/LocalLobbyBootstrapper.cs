@@ -7,15 +7,15 @@ namespace LobbyService.LocalServer
 {
     public class LocalLobbyBootstrapper : MonoBehaviour
     {
-        [SerializeField] private Sample view;
-        [SerializeField] private LobbyController controller;
+        [SerializeField] private SampleView view;
+        [SerializeField] private LobbyRules rules;
         
         private void Start()
         {
-            _ = InitializeWhenReady();
+            _ = InitializeAsync();
         }
 
-        private async Task InitializeWhenReady()
+        private async Task InitializeAsync()
         {
             try
             {
@@ -23,15 +23,12 @@ namespace LobbyService.LocalServer
                 if (!await LocalLobby.WaitForInitializationAsync(destroyCancellationToken)) return;
         
                 var provider = new LocalProvider();
-
-                // Set the provider in the controller after it is created
-                controller.SetProvider(provider);
-
-                // Handle the view after the provider is set.
-                // A provider must be set before any action can occur on the controller.
-                view.SetController(controller);
-            
-                controller.ConnectView(view);
+                
+                // Controller links itself to Lobby API in constructor so no need to cache a reference
+                var controller = new LobbyController(provider, rules);
+                
+                // Attaches the view to the lobby to allow it to receive updates
+                Lobby.ConnectView(view);
             }
             catch (OperationCanceledException) { /* Ignored */ }
             catch (Exception e)

@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace LobbyService.Samples.Steam
 {
-    public class Sample : MonoBehaviour, ICoreView, IFriendView
+    public class SampleView : MonoBehaviour, ICoreView, IFriendView
     {
         public TMP_Text lobbyNameText;
         public TMP_Text localUserText;
@@ -255,7 +255,12 @@ namespace LobbyService.Samples.Steam
             }
         }
 
-        public void Reset()
+        public void DisplayFriendAvatar(LobbyMember member, Texture2D avatar)
+        {
+            
+        }
+
+        public void Reset(ILobbyCapabilities capabilities)
         {
             localUserText.text = $"You are {_controller.LocalMember.DisplayName}";
             lobbyNameText.text = "Create or join a lobby";
@@ -279,18 +284,6 @@ namespace LobbyService.Samples.Steam
             invitePanel.SetActive(false);
             inviteText.text = "Accept invitation from ";
             _invite = null;
-        }
-
-        private void Update()
-        {
-            if (Keyboard.current.digit1Key.wasPressedThisFrame)
-            {
-                _controller.SendInvite(_controller.GetFriends()[0]);
-            }
-            if (Keyboard.current.digit2Key.wasPressedThisFrame)
-            {
-                _controller.SendInvite(_controller.GetFriends()[1]);
-            }
         }
     }
 }

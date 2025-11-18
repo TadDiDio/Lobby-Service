@@ -6,6 +6,11 @@ namespace LobbyService
         /// The capabilities listing what this browser filter supports.
         /// </summary>
         public BrowserFilterCapabilities FilterCapabilities { get; }
+
+        /// <summary>
+        /// Applies all set filters.
+        /// </summary>
+        public void ApplyFilters();
         
         /// <summary>
         /// Adds a number filter. Only lobbies matching this key-value pair will be returned.

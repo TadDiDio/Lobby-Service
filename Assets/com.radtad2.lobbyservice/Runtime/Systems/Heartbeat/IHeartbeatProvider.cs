@@ -3,7 +3,7 @@ using LobbyService.Heartbeat;
 
 namespace LobbyService
 {
-    public interface IHeartbeatProvider
+    public interface IHeartbeatProvider : IDisposable
     {
         /// <summary>
         /// Invoked when a member whose heartbeat you are listening to times out.

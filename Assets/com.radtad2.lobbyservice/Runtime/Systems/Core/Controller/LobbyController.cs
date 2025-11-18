@@ -252,6 +252,21 @@ namespace LobbyService
         public IReadonlyLobbyModel Model => _model;
         #endregion
         
+        #region View
+        /// <summary>
+        /// Connects a view to the lobby.
+        /// </summary>
+        /// <param name="view">The view to connect.</param>
+        public void ConnectView(IView view) => _viewModule.Connect(view);
+        
+        /// <summary>
+        /// Disconnects a view from the lobby.
+        /// </summary>
+        /// <param name="view">The view to disconnect.</param>
+        public void DisconnectView(IView view) => _viewModule.Disconnect(view);
+        
+        #endregion
+        
         #region Core
         /// <summary>
         /// Attempts to create a lobby.

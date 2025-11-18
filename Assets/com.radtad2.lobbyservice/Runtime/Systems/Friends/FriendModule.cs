@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LobbyService
 {
-    public class FriendModule : IFriendAPI, IDisposable
+    public class FriendModule : IFriendAPI
     {
         private IFriendView _viewBus;
         private IFriendProvider _provider;

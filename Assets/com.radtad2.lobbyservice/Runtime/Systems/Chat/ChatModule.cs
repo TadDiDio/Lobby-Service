@@ -1,8 +1,6 @@
-    using System;
-
 namespace LobbyService
 {
-    public class ChatModule : IChatAPI, IDisposable
+    public class ChatModule : IChatAPI
     {
         private IChatView _viewBus;
         private IChatProvider _chat;
@@ -48,9 +46,5 @@ namespace LobbyService
             if (!_model.InLobby) return;
             _viewBus.DisplayDirectMessage(message);
         }
-
-        public ChatCapabilities Capabilities { get; }
-        public event Action<LobbyChatMessage> OnChatMessageReceived;
-        public event Action<LobbyChatMessage> OnDirectMessageReceived;
     }
 }

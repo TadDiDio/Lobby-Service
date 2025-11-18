@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,22 +23,13 @@ namespace LobbyService.LocalServer
         {
             Member = member;
             memberName.text = member.DisplayName;
-            _ = GetAvatar(controller, member);
         }
 
-        private async Task GetAvatar(LobbyController controller, LobbyMember member)
+        public void SetAvatar(Texture2D avatar)
         {
-            try
-            {
-                var avatar = await controller.GetFriendAvatar(member, destroyCancellationToken);
-                if (avatar) avatarImage.texture = avatar;    
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+            avatarImage.texture = avatar;
         }
-
+        
         public Button EnableKickButton(bool buttonEnabled)
         {
             kickButton.gameObject.SetActive(buttonEnabled);

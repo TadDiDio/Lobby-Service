@@ -11,7 +11,7 @@ namespace LobbyService
     /// <summary>
     /// This interface provides a set of services for sending and recieving chat messages.
     /// </summary>
-    public interface IChatProvider
+    public interface IChatProvider : IDisposable
     {
         /// <summary>
         /// Lists capabilities for this chat module.

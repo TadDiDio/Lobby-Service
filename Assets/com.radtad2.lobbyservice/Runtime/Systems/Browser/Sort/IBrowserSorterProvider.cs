@@ -1,9 +1,15 @@
-using System;
+using System.Collections.Generic;
 
 namespace LobbyService
 {
     public interface IBrowserSorterProvider
     {
+        /// <summary>
+        /// Applies all sorters.
+        /// </summary>
+        /// <param name="lobbies">The lobbies to sort in place.</param>
+        public void ApplySorters(List<LobbyDescriptor> lobbies);
+        
         /// <summary>
         /// Adds a sorter.
         /// </summary>

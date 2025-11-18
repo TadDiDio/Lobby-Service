@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LobbyService
 {
@@ -32,5 +33,10 @@ namespace LobbyService
         /// </summary>
         /// <param name="member">The member to get for.</param>
         public void RequestAvatar(LobbyMember member);
+        
+        /// <summary>
+        /// A list of friends online found using the current filter.
+        /// </summary>
+        public List<LobbyMember> GetFriends();
     }
 }

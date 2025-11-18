@@ -10,19 +10,17 @@ namespace LobbyService.LocalServer
     {
         public event Action<List<LobbyMember>> FriendsUpdated;
         
-        private LocalProvider _provider;
         private float _pollingInterval;
         private CancellationTokenSource _friendCts;
-        
-        public LocalFriendsProvider(LocalProvider provider)
-        {
-            _provider = provider;
-        }
-        
-        public FriendCapabilities Capabilities { get; }= new FriendCapabilities
+        public FriendCapabilities Capabilities { get; } = new FriendCapabilities
         {
             SupportsAvatars = false
         };
+        
+        private void EnsureInitialized()
+        {
+            if (!LocalLobby.Initialized) throw new InvalidOperationException("LocalLobby must be initialized before use");
+        }
         
         public void StartFriendPolling(FriendDiscoveryFilter filter, float intervalSeconds, CancellationToken token = default)
         {
@@ -77,6 +75,11 @@ namespace LobbyService.LocalServer
         {
             await Task.CompletedTask;
             return Texture2D.whiteTexture;
+        }
+
+        public void Dispose()
+        {
+            // Resources cleaned up by controlling module
         }
     }
 }

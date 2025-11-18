@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace LobbyService.LocalServer
 {
@@ -35,7 +33,7 @@ namespace LobbyService.LocalServer
             _lifetimeCts = new CancellationTokenSource();
         }
 
-        public override void Dispose()
+        public override void DisposeThis()
         {
             LocalLobby.OnOtherMemberJoined -= HandleOtherMemberJoined;
             LocalLobby.OnOtherMemberLeft -= HandleOtherMemberLeft;
@@ -57,8 +55,7 @@ namespace LobbyService.LocalServer
 
         private void EnsureInitialized()
         {
-            if (!LocalLobby.Initialized)
-                throw new InvalidOperationException("LocalLobby must be initialized before use");
+            if (!LocalLobby.Initialized) throw new InvalidOperationException("LocalLobby must be initialized before use");
         }
         
         #region Core

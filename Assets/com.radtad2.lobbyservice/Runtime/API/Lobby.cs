@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.Search;
 
 namespace LobbyService
 {
@@ -37,7 +38,7 @@ namespace LobbyService
         public static IFriendAPI Friends { get; private set; }
         public static IChatAPI Chat { get; private set; }
         public static IProcedureAPI Procedure { get; private set; }
-
+            
         #region Core
         private static void Dispatch(Action call)
         {
@@ -104,6 +105,21 @@ namespace LobbyService
         /// <remarks>This sets only the local member's data. If you want to give the owner the ability to set anyone's
         /// member data, you should implement it as a procedure in the IProcedureProvider.</remarks>
         public static void SetMemberData(string key, string value) => Dispatch(() => _controller.SetMemberData(key, value));
+        #endregion
+        
+        #region View
+        /// <summary>
+        /// Connects a view to the lobby.
+        /// </summary>
+        /// <param name="view">The view to connect.</param>
+        public static void ConnectView(IView view) => Dispatch(() => _controller.ConnectView(view));
+        
+        /// <summary>
+        /// Disconnects a view from the lobby.
+        /// </summary>
+        /// <param name="view">The view to disconnect.</param>
+        public static void DisconnectView(IView view) => Dispatch(() => _controller.DisconnectView(view));
+        
         #endregion
         
         #region Read Surface

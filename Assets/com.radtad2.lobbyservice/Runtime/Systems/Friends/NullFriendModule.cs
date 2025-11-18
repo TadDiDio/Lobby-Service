@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace LobbyService
 {
     /// <summary>
@@ -10,6 +12,7 @@ namespace LobbyService
         public void SetFilter(FriendDiscoveryFilter filter) { }
         public void StopPolling() { }
         public void RequestAvatar(LobbyMember member) { }
+        public List<LobbyMember> GetFriends() => new();
         public void Dispose() { }
     }
 }

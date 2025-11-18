@@ -9,7 +9,7 @@ namespace LobbyService
     /// <summary>
     /// Provides services for discovering and inviting friends.
     /// </summary>
-    public interface IFriendProvider
+    public interface IFriendProvider : IDisposable
     {
         /// <summary>
         /// Capabilities of this friends provider.
