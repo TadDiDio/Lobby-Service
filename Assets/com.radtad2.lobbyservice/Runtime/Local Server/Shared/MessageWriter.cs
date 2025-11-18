@@ -39,6 +39,7 @@ namespace LobbyService.LocalServer
                         else await Task.Delay(10, _tokenSource.Token);
                     }
                     catch (OperationCanceledException) { break; }
+                    catch (IOException) { break; }
                 }
             }
             catch (Exception e)

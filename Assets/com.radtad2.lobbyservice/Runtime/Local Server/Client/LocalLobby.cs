@@ -175,7 +175,6 @@ namespace LobbyService.LocalServer
             switch (evt)
             {
                 case OtherMemberJoinedEvent joined:
-                    Debug.Log(joined.Member.ToLobbyMember() + " joined");
                     OnOtherMemberJoined?.Invoke(new MemberJoinedInfo
                     {
                         Member = joined.Member.ToLobbyMember(),
@@ -183,7 +182,6 @@ namespace LobbyService.LocalServer
                     });
                     break;
                 case OtherMemberLeftEvent left:
-                    Debug.Log(left.Member.ToLobbyMember() + " left");
                     OnOtherMemberLeft?.Invoke(new LeaveInfo
                     {
                         Member = left.Member.ToLobbyMember(),
@@ -192,7 +190,6 @@ namespace LobbyService.LocalServer
                     });
                     break;
                 case LocalMemberKickedEvent kicked:
-                    Debug.Log("Kicked!");
                     OnLocalMemberKicked?.Invoke(new KickInfo
                     {
                         Reason = (KickReason)kicked.KickReason

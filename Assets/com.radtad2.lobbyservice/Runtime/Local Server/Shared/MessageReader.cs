@@ -1,10 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace LobbyService.LocalServer
 {
@@ -46,6 +43,7 @@ namespace LobbyService.LocalServer
                 OnMessage -= Listener;
                 return null;
             }
+            catch (OperationCanceledException) { return null; }
             catch (Exception e)
             {
                 SharedLogger.WriteLine(e);

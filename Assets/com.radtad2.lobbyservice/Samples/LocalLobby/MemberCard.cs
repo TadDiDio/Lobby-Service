@@ -9,6 +9,7 @@ namespace LobbyService.LocalServer
         public TMP_Text memberName;
         public RawImage avatarImage;
         public Button kickButton;
+        public Button promoteButton;
         public Image ownerCrown;
         
         public LobbyMember Member;
@@ -17,6 +18,7 @@ namespace LobbyService.LocalServer
         {
             kickButton.gameObject.SetActive(false);
             ownerCrown.gameObject.SetActive(false);
+            promoteButton.gameObject.SetActive(false);
         }
 
         public void Initialize(LobbyMember member)
@@ -30,10 +32,10 @@ namespace LobbyService.LocalServer
             avatarImage.texture = avatar;
         }
         
-        public Button EnableKickButton(bool buttonEnabled)
+        public void EnableOwnerButtons(bool buttonEnabled)
         {
             kickButton.gameObject.SetActive(buttonEnabled);
-            return kickButton;
+            promoteButton.gameObject.SetActive(buttonEnabled);
         }
 
         public void SetOwner(bool isOwner)

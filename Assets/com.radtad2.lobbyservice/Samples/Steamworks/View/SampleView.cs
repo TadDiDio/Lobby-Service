@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using LobbyService.LocalServer;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace LobbyService.Samples.Steam
 {
@@ -31,6 +31,9 @@ namespace LobbyService.Samples.Steam
         public MemberCard memberCardPrefab;
         public GameObject memberCardContainer;
 
+        public Button leaveButton;
+        public Button closeButton;
+        
         private LobbyInvite? _invite;
         
         private Dictionary<LobbyMember, MemberCard> _members = new();
@@ -43,6 +46,9 @@ namespace LobbyService.Samples.Steam
             
             acceptInviteButton.onClick.AddListener(AcceptInvite);
             rejectInviteButton.onClick.AddListener(RejectInvite);
+            
+            leaveButton.onClick.AddListener(Leave);
+            closeButton.onClick.AddListener(Close);
         }
 
         private void OnDestroy()
@@ -52,6 +58,8 @@ namespace LobbyService.Samples.Steam
             capacitySlider.onValueChanged.RemoveAllListeners();
             acceptInviteButton.onClick.RemoveAllListeners();
             rejectInviteButton.onClick.RemoveAllListeners();
+            leaveButton.onClick.RemoveAllListeners();
+            closeButton.onClick.RemoveAllListeners();
         }
 
         private void ToggleFriends()
@@ -71,10 +79,9 @@ namespace LobbyService.Samples.Steam
 
             if (Lobby.IsOwner && Lobby.LocalMember != member)
             {
-                card.EnableKickButton(true).onClick.AddListener(() =>
-                {
-                    Lobby.KickMember(member);
-                });
+                card.EnableOwnerButtons(true);
+                card.kickButton.onClick.AddListener(() => Lobby.KickMember(member));
+                card.promoteButton.onClick.AddListener(() => Lobby.SetOwner(member));
             }
             
             card.SetOwner(member == Lobby.Model.Owner);
@@ -113,6 +120,11 @@ namespace LobbyService.Samples.Steam
         {
             Lobby.Leave();
         }
+
+        public void Close()
+        {
+            Lobby.Close();
+        }
         
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
         {
@@ -129,7 +141,8 @@ namespace LobbyService.Samples.Steam
             if (!result.Success) return;
 
             AddMember(result.LocalMember);
-            lobbyNameText.text = result.LobbyData.GetOrDefault(LobbyKeys.NameKey, "New lobby");
+
+            OnEnterLobby();
         }
 
         public void DisplayJoinRequested(JoinLobbyRequest request)
@@ -145,15 +158,25 @@ namespace LobbyService.Samples.Steam
             {
                 AddMember(member);
             }
-            
-            lobbyNameText.text = result.LobbyData.GetOrDefault(LobbyKeys.NameKey, "New lobby");
+
+            OnEnterLobby();
         }
 
+        private void OnEnterLobby()
+        {
+            lobbyNameText.text = Lobby.GetLobbyDataOrDefault(LobbyKeys.NameKey, $"{Lobby.Model.Owner}'s lobby");
+            leaveButton.gameObject.SetActive(true);
+            SetViewIsOwner(Lobby.IsOwner);
+        }
+        
         public void DisplayLocalMemberLeft(LeaveInfo info)
         {
             localUserText.text = $"You are {Lobby.LocalMember.DisplayName}";
             lobbyNameText.text = "Create or join a lobby";
 
+            leaveButton.gameObject.SetActive(false);
+            SetViewIsOwner(false);
+            
             foreach (var member in _members.Values)
             {
                 Destroy(member.gameObject);
@@ -189,26 +212,34 @@ namespace LobbyService.Samples.Steam
 
         public void DisplayUpdateOwner(LobbyMember newOwner)
         {
+            SetViewIsOwner(Lobby.IsOwner);
+            
             foreach (var card in _members.Values)
             {
                 card.SetOwner(newOwner == card.Member);
-                var button = card.EnableKickButton(Lobby.IsOwner);
+                card.EnableOwnerButtons(Lobby.IsOwner && Lobby.LocalMember != card.Member);
 
                 if (Lobby.IsOwner && Lobby.LocalMember != card.Member)
                 {
-                    button.onClick.AddListener(() => Lobby.KickMember(card.Member));
+                    card.kickButton.onClick.AddListener(() => Lobby.KickMember(card.Member));
+                    card.promoteButton.onClick.AddListener(() => Lobby.SetOwner(card.Member));
                 }
             }
         }
 
+        private void SetViewIsOwner(bool isOwner)
+        {
+            closeButton.gameObject.SetActive(isOwner);
+        }
+        
         public void DisplayUpdateLobbyData(LobbyDataUpdate update)
         {
-            Debug.Log("Lobby data updated");
+            lobbyNameText.text = update.Data.GetOrDefault(LobbyKeys.NameKey, "UNKNOWN NAME");
         }
 
         public void DisplayUpdateMemberData(MemberDataUpdate update)
         {
-            Debug.Log($"{update.Member}'s data updated");
+            Debug.Log($"{update.Member} ready: {update.Data.GetOrDefault(LobbyKeys.ReadyKey, "false")}");
         }
 
         private struct FriendCard
@@ -246,10 +277,7 @@ namespace LobbyService.Samples.Steam
             }
         }
 
-        public void DisplayFriendAvatar(LobbyMember member, Texture2D avatar)
-        {
-            
-        }
+        public void DisplayFriendAvatar(LobbyMember member, Texture2D avatar) { }
 
         public void ResetView(ILobbyCapabilities capabilities)
         {
@@ -275,6 +303,23 @@ namespace LobbyService.Samples.Steam
             invitePanel.SetActive(false);
             inviteText.text = "Accept invitation from ";
             _invite = null;
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            {
+                Lobby.SetLobbyData(LobbyKeys.NameKey, "Test name lol");
+            }
+            
+            if (Keyboard.current.digit2Key.wasPressedThisFrame)
+            {
+                var ready = Lobby.GetMemberDataOrDefault(Lobby.LocalMember, LobbyKeys.ReadyKey, "false");
+
+                var flag = bool.Parse(ready);
+                
+                Lobby.SetMemberData(LobbyKeys.ReadyKey, (!flag).ToString());
+            }
         }
     }
 }

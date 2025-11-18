@@ -47,11 +47,11 @@ namespace LobbyService.LocalServer
         }
 
         public override bool ShouldFlushStaleLobbies() => false;
-        public override IProcedureProvider Procedures { get; }
-        public override IHeartbeatProvider Heartbeat { get; }
-        public override IBrowserProvider Browser { get; }
+        public override IProcedureProvider Procedures { get; } = null;
+        public override IHeartbeatProvider Heartbeat { get; } = null;
+        public override IBrowserProvider Browser { get; } = new LocalBrowserProvider();
         public override IFriendProvider Friends { get; } = new LocalFriendsProvider();
-        public override IChatProvider Chat { get; }
+        public override IChatProvider Chat { get; } = new LocalChatProvider();
 
         private void EnsureInitialized()
         {
