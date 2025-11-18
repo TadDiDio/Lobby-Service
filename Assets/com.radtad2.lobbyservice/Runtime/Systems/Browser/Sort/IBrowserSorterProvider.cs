@@ -1,3 +1,5 @@
+using System;
+
 namespace LobbyService
 {
     public interface IBrowserSorterProvider

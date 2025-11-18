@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -38,11 +39,12 @@ namespace LobbyService
             }
             catch (OperationCanceledException)
             {
-                // Ignored
+                _viewBus.DisplayBrowsingResult(new List<LobbyDescriptor>());   
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
+                _viewBus.DisplayBrowsingResult(new List<LobbyDescriptor>());
             }
         }
 

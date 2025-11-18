@@ -8,6 +8,7 @@ namespace LobbyService
         /// <summary>
         /// Called when the lobby system is reset and all state should be cleared
         /// </summary>
-        public void Reset();
+        /// <param name="capabilities">The capabilities of the currently configured lobby.</param>
+        public void Reset(ILobbyCapabilities capabilities);
     }
 }

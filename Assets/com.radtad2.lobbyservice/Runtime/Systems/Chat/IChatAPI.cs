@@ -2,7 +2,7 @@ using System;
 
 namespace LobbyService
 {
-    public interface IChatAPI
+    public interface IChatAPI : IDisposable
     {
         /// <summary>
         /// Lists capabilities for this chat module.

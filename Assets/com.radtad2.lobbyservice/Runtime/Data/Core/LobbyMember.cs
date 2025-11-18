@@ -5,6 +5,8 @@ namespace LobbyService
 {
     public class LobbyMember : IEquatable<LobbyMember>
     {
+        public static LobbyMember Unknown { get; } = new(new ProviderId(Guid.NewGuid().ToString()), "Unknown");
+        
         public ProviderId Id { get; }
         public string DisplayName { get; }
 

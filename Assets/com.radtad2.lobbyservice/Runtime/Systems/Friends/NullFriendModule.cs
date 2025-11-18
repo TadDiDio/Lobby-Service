@@ -10,5 +10,6 @@ namespace LobbyService
         public void SetFilter(FriendDiscoveryFilter filter) { }
         public void StopPolling() { }
         public void RequestAvatar(LobbyMember member) { }
+        public void Dispose() { }
     }
 }

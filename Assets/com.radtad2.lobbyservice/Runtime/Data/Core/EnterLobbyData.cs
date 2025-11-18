@@ -45,11 +45,6 @@ namespace LobbyService
         /// The failed request.
         /// </summary>
         public TRequest Request;
-
-        /// <summary>
-        /// How many attempts have already failed.
-        /// </summary>
-        public int FailedAttempts;
     }
 
     /// <summary>

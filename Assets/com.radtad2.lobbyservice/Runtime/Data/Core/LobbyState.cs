@@ -5,6 +5,5 @@ namespace LobbyService
         NotInLobby,
         Joining,
         InLobby,
-        Leaving
     }
 }

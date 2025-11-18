@@ -14,7 +14,6 @@ namespace LobbyService
         /// <summary>
         /// Tells if this provider is obsolete. This occurs when a provider is swapped.
         /// </summary>
-        /// <returns>True if obsolete.</returns>
         public bool IsObsolete() => _obsolete;
 
         /// <summary>
@@ -25,8 +24,7 @@ namespace LobbyService
         /// <summary>
         /// Whether this provider should automatically attempt to leave a stale lobby if one exists when being created.
         /// </summary>
-        /// <returns></returns>
-        public virtual bool ShouldAutoLeaveOnCreation() => true;
+        public virtual bool ShouldFlushStaleLobbies() => true;
 
         #region Extra Modules
 
@@ -34,7 +32,7 @@ namespace LobbyService
         public abstract IBrowserProvider Browser { get; }
         public abstract IFriendProvider  Friends { get; }
         public abstract IChatProvider Chat { get; }
-        public abstract IProcedureProvider Procedure { get; }
+        public abstract IProcedureProvider Procedures { get; }
         
         #endregion
         

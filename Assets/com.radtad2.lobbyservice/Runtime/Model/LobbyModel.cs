@@ -42,14 +42,16 @@ namespace LobbyService
         {
             if (!result.Success) return;
 
+            Reset();
+            
             InLobby = true;
             LobbyId = result.LobbyId;
             Owner = result.Owner;
             Capacity = result.Capacity;
             Type = result.Type;
             Members = new List<LobbyMember>(result.Members);
-            MemberData = new Dictionary<LobbyMember, Metadata>(result.MemberData);
             LobbyData = new Metadata(result.LobbyData);
+            MemberData = new Dictionary<LobbyMember, Metadata>(result.MemberData);
         }
 
         public void Reset()

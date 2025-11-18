@@ -168,7 +168,7 @@ namespace LobbyService.Samples.Steam
             _members.Clear();
         }
 
-        public void DisplaySendInvite(InviteSentInfo info)
+        public void DisplaySentInvite(InviteSentInfo info)
         {
             if (info.InviteSent) Debug.Log($"Sending invite to {info.Member}...");
         }

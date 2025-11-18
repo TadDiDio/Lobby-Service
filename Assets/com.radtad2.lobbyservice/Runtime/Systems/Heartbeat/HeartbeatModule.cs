@@ -1,9 +1,8 @@
-using System;
 using LobbyService.Heartbeat;
 
 namespace LobbyService
 {
-    public class HeartbeatModule : IDisposable
+    public class HeartbeatModule : IHeartbeatAPI
     {
         private LobbyController _controller;
         private IHeartbeatProvider _heartbeat;
@@ -30,9 +29,14 @@ namespace LobbyService
             _heartbeat.StartOwnHeartbeat(_model.LobbyId, intervalSeconds, otherTimeoutSeconds);
         }
 
-        public void StopHeartbeatAndClearSubscriptions()
+        public void StopOwnHeartbeat()
         {
-            _heartbeat.StopHeartbeatAndClearSubscriptions();
+            _heartbeat.StopOwnHeartbeat();
+        }
+
+        public void ClearSubscriptions()
+        {
+            _heartbeat.ClearSubscriptions();
         }
 
         public void SubscribeToHeartbeat(LobbyMember member)

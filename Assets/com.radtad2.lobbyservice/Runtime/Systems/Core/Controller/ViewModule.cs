@@ -17,13 +17,12 @@ namespace LobbyService
         /// <summary>
         /// Connects a view to the lobby.
         /// </summary>
-        public void Connect(IView view, bool reset = true)
+        public void Connect(IView view)
         {
             if (view == null) return;
             
             _views.Add(view);
-            
-            if (reset) view.Reset();
+            view.Reset(_controller.Capabilities);
             
             if (_controller.Model.InLobby)
             {
@@ -49,9 +48,9 @@ namespace LobbyService
             }
         }
         
-        public void Reset()
+        public void Reset(ILobbyCapabilities capabilities)
         {
-            Display<IView>(v => v.Reset());
+            Display<IView>(v => v.Reset(capabilities));
         }
 
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
@@ -84,9 +83,9 @@ namespace LobbyService
             Display<ICoreView>(v => v.DisplayLocalMemberLeft(info));
         }
 
-        public void DisplaySendInvite(InviteSentInfo info)
+        public void DisplaySentInvite(InviteSentInfo info)
         {
-            Display<ICoreView>(v => v.DisplaySendInvite(info));
+            Display<ICoreView>(v => v.DisplaySentInvite(info));
         }
 
         public void DisplayReceivedInvite(LobbyInvite invite)

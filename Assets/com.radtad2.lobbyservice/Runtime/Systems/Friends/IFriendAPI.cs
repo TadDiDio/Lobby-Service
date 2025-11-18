@@ -1,6 +1,8 @@
+using System;
+
 namespace LobbyService
 {
-    public interface IFriendAPI
+    public interface IFriendAPI : IDisposable
     {
         /// <summary>
         /// Starts polling for friends on an interval.

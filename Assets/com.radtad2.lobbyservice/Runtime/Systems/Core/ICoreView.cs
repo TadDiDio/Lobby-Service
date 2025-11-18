@@ -43,7 +43,7 @@ namespace LobbyService
         /// Called when an invite is issued.
         /// </summary>
         /// <param name="info">Info about the invite.</param>
-        public void DisplaySendInvite(InviteSentInfo info);
+        public void DisplaySentInvite(InviteSentInfo info);
 
         /// <summary>
         /// Called when you receive an invite.

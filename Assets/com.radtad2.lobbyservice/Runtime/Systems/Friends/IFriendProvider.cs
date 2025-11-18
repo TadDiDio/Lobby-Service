@@ -12,6 +12,11 @@ namespace LobbyService
     public interface IFriendProvider
     {
         /// <summary>
+        /// Capabilities of this friends provider.
+        /// </summary>
+        public FriendCapabilities Capabilities { get; }
+        
+        /// <summary>
         /// Invoked when a refreshed list of friends is found.
         /// </summary>
         public event Action<List<LobbyMember>> FriendsUpdated;

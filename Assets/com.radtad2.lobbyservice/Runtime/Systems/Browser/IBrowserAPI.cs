@@ -1,3 +1,5 @@
+using System;
+
 namespace LobbyService
 {
     public interface IBrowserAPIInternal : IBrowserAPI
@@ -6,7 +8,7 @@ namespace LobbyService
         public new IBrowserSorterAPI Sorter { get; set; }  
     }
     
-    public interface IBrowserAPI
+    public interface IBrowserAPI : IDisposable
     {
         /// <summary>
         /// Filtering functionality.
