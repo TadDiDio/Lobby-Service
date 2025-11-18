@@ -1,10 +1,14 @@
 using System;
-using UnityEditor.Search;
 
 namespace LobbyService
 {
     public static class Lobby
     {
+        public static IBrowserAPI Browser { get; private set; }
+        public static IFriendAPI Friends { get; private set; }
+        public static IChatAPI Chat { get; private set; }
+        public static IProcedureAPI Procedure { get; private set; }
+        
         private static LobbyController _controller;
         private static IPreInitStrategy _preInitStrategy = new DropPreInitStrategy();
         
@@ -21,6 +25,19 @@ namespace LobbyService
             Chat =  ModuleProxyFactory.Create<IChatAPI>(_preInitStrategy);
             Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_preInitStrategy);
         }
+
+        public static void Shutdown()
+        {
+            _preInitStrategy = new DropPreInitStrategy();
+            if (_controller == null) return;
+            _controller.Dispose();
+            _controller = null;
+
+            Browser = null;
+            Friends = null;
+            Chat = null;
+            Procedure = null;
+        }
         
         public static void SetController(LobbyController controller)
         {
@@ -33,11 +50,6 @@ namespace LobbyService
             ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
             // ReSharper restore SuspiciousTypeConversion.Global
         }
-        
-        public static IBrowserAPI Browser { get; private set; }
-        public static IFriendAPI Friends { get; private set; }
-        public static IChatAPI Chat { get; private set; }
-        public static IProcedureAPI Procedure { get; private set; }
             
         #region Core
         private static void Dispatch(Action call)
