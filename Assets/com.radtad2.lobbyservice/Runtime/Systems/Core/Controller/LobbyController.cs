@@ -192,7 +192,7 @@ namespace LobbyService
             }
             else Chat = new NullChatModule();
 
-            if (_provider.Heartbeat != null)
+            if (_provider.Heartbeat != null && _rules.UseHeartbeatTimeout)
             {
                 _heartbeat = new HeartbeatModule(this, _provider.Heartbeat, _model);
             }
@@ -446,7 +446,6 @@ namespace LobbyService
         public void SetLobbyData(string key, string value)
         {
             if (!ValidatePermission(LobbyState.InLobby, true)) return;
-
             if (!_provider.SetLobbyData(_model.LobbyId, key, value)) return;
 
             _model.LobbyData.Set(key, value);

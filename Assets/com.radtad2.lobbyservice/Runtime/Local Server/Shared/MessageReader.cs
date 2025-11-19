@@ -11,6 +11,8 @@ namespace LobbyService.LocalServer
         public event Action OnDisconnected;
         
         private CancellationTokenSource _tokenSource;
+        private bool _disposed;
+        
         
         public MessageReader(StreamReader reader)
         {
@@ -20,6 +22,8 @@ namespace LobbyService.LocalServer
         
         public async Task<Message> WaitForMessageAsync(Guid messageId, float timeoutSeconds, CancellationToken token)
         {
+            if (_disposed) return Message.CreateFailure(Error.Cancelled, messageId);
+            
             var combined = CancellationTokenSource.CreateLinkedTokenSource(token, _tokenSource.Token);
             var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -87,6 +91,7 @@ namespace LobbyService.LocalServer
 
         public void Dispose()
         {
+            _disposed = true;
             _tokenSource?.Cancel();
             _tokenSource?.Dispose();
         }

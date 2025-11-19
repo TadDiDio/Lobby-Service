@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace LobbyService.LocalServer
@@ -20,6 +21,11 @@ namespace LobbyService.LocalServer
         private static Dictionary<string, LobbySnapshot> _cachedLobbies;
         
         private static CancellationTokenSource _shutdownCts;
+
+        static LocalLobby()
+        {
+            Application.quitting += Shutdown;
+        }
         
         public static async Task<bool> WaitForInitializationAsync(CancellationToken token)
         {
@@ -58,6 +64,7 @@ namespace LobbyService.LocalServer
                 
                 Initialized = true;
                 Debug.Log($"[Local Lobby] Initialized as user {_localUser}");
+                Application.quitting += Shutdown;
                 return true;
             }
             catch (OperationCanceledException)
@@ -80,8 +87,8 @@ namespace LobbyService.LocalServer
         public static void Shutdown()
         {
             if (!Initialized) return;
-            
             Initialized = false;
+            Application.quitting -= Shutdown;
             
             if (_shutdownCts is { IsCancellationRequested: false })
             {

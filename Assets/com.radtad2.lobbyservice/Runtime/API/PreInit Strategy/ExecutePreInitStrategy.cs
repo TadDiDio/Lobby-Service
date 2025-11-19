@@ -2,7 +2,7 @@ using System;
 
 namespace LobbyService
 {
-    public class ExecuteUnInitStrategy : IUnInitStrategy
+    public class ExecutePreInitStrategy : IPreInitStrategy
     {
         public void Handle(Action call)
         {

@@ -35,6 +35,7 @@ namespace LobbyService.LocalServer
             {
                 while (!token.IsCancellationRequested)
                 {
+                    LocalProvider.EnsureInitialized();
                     var response = await LocalLobby.GetFriends(token: token);
             
                     if (response.Error is Error.Ok)

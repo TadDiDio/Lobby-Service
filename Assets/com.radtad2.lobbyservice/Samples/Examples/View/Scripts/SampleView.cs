@@ -95,7 +95,7 @@ namespace LobbyService.Example
             {
                 Capacity = (int)capacitySlider.value,
                 LobbyType =  LobbyType.Public,
-                Name = string.IsNullOrWhiteSpace(nameInput.text) ? $"{Lobby.LocalMember.DisplayName}'s Lobby" : nameInput.text
+                Name = nameInput.text
             });
         }
 
@@ -165,6 +165,12 @@ namespace LobbyService.Example
         private void OnEnterLobby()
         {
             lobbyNameText.text = Lobby.GetLobbyDataOrDefault(LobbyKeys.NameKey, $"{Lobby.Model.Owner}'s lobby");
+
+            if (string.IsNullOrEmpty(lobbyNameText.text) && Lobby.IsOwner)
+            {
+                Lobby.SetLobbyData(LobbyKeys.NameKey, $"{Lobby.LocalMember}'s lobby");
+            }
+            
             leaveButton.gameObject.SetActive(true);
             SetViewIsOwner(Lobby.IsOwner);
         }

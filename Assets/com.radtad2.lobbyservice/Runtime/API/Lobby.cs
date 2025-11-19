@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 namespace LobbyService
@@ -33,21 +32,21 @@ namespace LobbyService
         public static bool AllowingActions { get; private set; }
         
         private static LobbyController _controller;
-        private static UnInitWrapper _unInitWrapper;
+        private static PreInitWrapper _preInitWrapper;
         private static LobbyRules _rules = new();
         
         static Lobby()
         {
-            _unInitWrapper = new UnInitWrapper(new ExecuteUnInitStrategy());
+            _preInitWrapper = new PreInitWrapper(new ExecutePreInitStrategy());
             
-            var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_unInitWrapper);
-            browserProxy.Filter = ModuleProxyFactory.Create<IBrowserFilterAPI>(_unInitWrapper);
-            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_unInitWrapper);
+            var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_preInitWrapper);
+            browserProxy.Filter = ModuleProxyFactory.Create<IBrowserFilterAPI>(_preInitWrapper);
+            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitWrapper);
             Browser = browserProxy;
             
-            Friends = ModuleProxyFactory.Create<IFriendAPI>(_unInitWrapper);
-            Chat =  ModuleProxyFactory.Create<IChatAPI>(_unInitWrapper);
-            Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_unInitWrapper);
+            Friends = ModuleProxyFactory.Create<IFriendAPI>(_preInitWrapper);
+            Chat =  ModuleProxyFactory.Create<IChatAPI>(_preInitWrapper);
+            Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_preInitWrapper);
         }
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -58,6 +57,7 @@ namespace LobbyService
         }
         private static void Shutdown()
         {
+            Application.quitting -= Shutdown;
             AllowingActions = false;
 
             if (_controller != null)
@@ -73,7 +73,7 @@ namespace LobbyService
             ((ModuleProxy<IProcedureAPI>)Procedure).DetachTarget();
             // ReSharper restore SuspiciousTypeConversion.Global
             
-            _unInitWrapper.Reset(new ExecuteUnInitStrategy());
+            _preInitWrapper.Reset(new ExecutePreInitStrategy());
         }
         
         /// <summary>
@@ -82,10 +82,10 @@ namespace LobbyService
         /// <param name="strategy">The strategy to use.</param>
         /// <remarks>Changing this will also affect all previous lobby actions since they are buffered
         /// until a provider is set.</remarks>
-        public static void SetUnInitStrategy(IUnInitStrategy strategy)
+        public static void SetPreInitStrategy(IPreInitStrategy strategy)
         {
             if (strategy == null) return;
-            _unInitWrapper.SetStrategy(strategy);
+            _preInitWrapper.SetStrategy(strategy);
         }
 
         public static void SetRules(LobbyRules rules)
@@ -112,12 +112,7 @@ namespace LobbyService
                 
                 if (_rules.AutoStartFriendPolling) Friends.StartPolling(_rules.FriendDiscoveryFilter, _rules.FriendPollingRateSeconds);
             
-                if (_rules.AutoStartLobbies)
-                {
-                    var request = _rules.AutoLobbyCreateRequest;
-                    if (_rules.NameAutoLobbyAfterUser) request.Name = $"{LocalMember}'s Lobby";
-                    Create(request);
-                }
+                _preInitWrapper.Flush();
             }
             else _controller.SetProvider(newProvider);
         }
@@ -126,8 +121,15 @@ namespace LobbyService
         private static void Dispatch(Action call)
         {
             if (!AllowingActions) return;
-            
-            if (_controller == null) _unInitWrapper.RegisterAction(call);
+
+            if (_controller == null)
+            {
+                if (_rules.WarnOnPreInitCommands)
+                {
+                    Debug.LogWarning($"Received a call before initialization: {Environment.NewLine}{Environment.StackTrace}");
+                }
+                _preInitWrapper.RegisterAction(call);
+            }
             else call();
         }
         

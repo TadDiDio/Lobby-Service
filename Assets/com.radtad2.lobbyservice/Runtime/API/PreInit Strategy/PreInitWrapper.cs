@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace LobbyService
 {
-    public class UnInitWrapper
+    public class PreInitWrapper
     {
-        private IUnInitStrategy _strategy;
+        private IPreInitStrategy _strategy;
         private Queue<Action> _callList = new();
 
-        public UnInitWrapper(IUnInitStrategy strategy)
+        public PreInitWrapper(IPreInitStrategy strategy)
         {
             SetStrategy(strategy);
         }
         
-        public void SetStrategy(IUnInitStrategy strategy)
+        public void SetStrategy(IPreInitStrategy strategy)
         {
             _strategy = strategy;
         }
@@ -31,7 +31,7 @@ namespace LobbyService
             }
         }
 
-        public void Reset(IUnInitStrategy strategy)
+        public void Reset(IPreInitStrategy strategy)
         {
             _strategy = strategy;
             _callList.Clear();

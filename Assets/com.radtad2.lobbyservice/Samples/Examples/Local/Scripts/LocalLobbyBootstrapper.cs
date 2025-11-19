@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using LobbyService.Example;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LobbyService.LocalServer.Example
 {
@@ -20,7 +21,7 @@ namespace LobbyService.LocalServer.Example
             try
             {
                 // We need to initialize the asynchronous backend
-                await LocalLobby.WaitForInitializationAsync(destroyCancellationToken);
+                if (!await LocalLobby.WaitForInitializationAsync(destroyCancellationToken)) return;
                 
                 // The provider depends on the API, so create this afterwards
                 var provider = new LocalProvider();
@@ -33,7 +34,7 @@ namespace LobbyService.LocalServer.Example
                 // in its awake method before this runs. The default is to queue and run commands after the 
                 // lobby is set up but you can change it to ignore calls by uncommenting the next line
             
-                // Lobby.SetUnInitStrategy(new DropUnInitStrategy()); // Or create your own strat inheriting from IUnInitStrategy
+                // Lobby.SetPreInitStrategy(new DropPreInitStrategy()); // Or create your own strat inheriting from IPreInitStrategy
             
                 // REQUIRED: This is the only call needed to start the lobby system. 
                 // It must know which backend to use. This can be safely called again whenever you wish to hotswap backends.
@@ -50,6 +51,15 @@ namespace LobbyService.LocalServer.Example
             catch (Exception e)
             {
                 Debug.LogException(e);
+            }
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                if (LocalLobby.Initialized) LocalLobby.Shutdown();
+                else _ = LocalLobby.WaitForInitializationAsync(destroyCancellationToken);
             }
         }
     }

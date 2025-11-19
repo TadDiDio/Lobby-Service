@@ -7,10 +7,10 @@ namespace LobbyService
 {
     public class ModuleProxy<T> : DispatchProxy
     {
-        private UnInitWrapper _strategyWrapper;
+        private PreInitWrapper _strategyWrapper;
         private T _target;
         
-        public void Initialize(UnInitWrapper strategyWrapper)
+        public void Initialize(PreInitWrapper strategyWrapper)
         {
             _strategyWrapper = strategyWrapper;
         }

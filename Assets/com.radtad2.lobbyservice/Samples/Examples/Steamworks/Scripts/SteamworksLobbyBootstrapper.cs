@@ -31,7 +31,7 @@ namespace LobbyService.Example
             // in its awake method before this runs. The default is to queue and run commands after the 
             // lobby is set up but you can change it to ignore calls by uncommenting the next line
             
-            // Lobby.SetUnInitStrategy(new DropUnInitStrategy()); // Or create your own strat inheriting from IUnInitStrategy
+            // Lobby.SetPreInitStrategy(new DropPreInitStrategy()); // Or create your own strat inheriting from IPreInitStrategy
             
             // REQUIRED: This is the only call needed to start the lobby system. 
             // It must know which backend to use. This can be safely called again whenever you wish to hotswap backends.
