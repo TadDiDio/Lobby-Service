@@ -15,15 +15,14 @@ namespace LobbyService.LocalServer
     {
         public LobbySnapshot Snapshot { get; set; }
     }
-
-    
-    
-    
-    
-    
     
     public class QueryFriendsResponse : IResponse
     {
         public List<LocalLobbyMember> Friends { get; set; }
+    }
+
+    public class BrowseResponse : IResponse
+    {
+        public List<LobbySnapshot> Snapshots { get; set; }
     }
 }

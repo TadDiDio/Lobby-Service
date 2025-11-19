@@ -60,4 +60,6 @@ namespace LobbyService.LocalServer
     }
 
     public class QueryFriendsRequest : IRequest { }
+
+    public class BrowseRequest : IRequest { }
 }

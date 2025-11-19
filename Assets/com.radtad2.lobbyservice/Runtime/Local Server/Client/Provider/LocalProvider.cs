@@ -53,7 +53,7 @@ namespace LobbyService.LocalServer
         public override IFriendProvider Friends { get; } = new LocalFriendsProvider();
         public override IChatProvider Chat { get; } = new LocalChatProvider();
 
-        private void EnsureInitialized()
+        public static void EnsureInitialized()
         {
             if (!LocalLobby.Initialized) throw new InvalidOperationException("LocalLobby must be initialized before use");
         }

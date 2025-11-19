@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,9 +9,22 @@ namespace LobbyService.LocalServer
     {
         public IBrowserFilterProvider Filter { get; } = new LocalBrowserFilterProvider();
         public IBrowserSorterProvider Sorter { get; } = new LocalBrowserSorterProvider();
-        public Task<List<LobbyDescriptor>> Browse(CancellationToken token)
+        public async Task<List<LobbyDescriptor>> Browse(CancellationToken token)
         {
-            throw new System.NotImplementedException();
+            LocalProvider.EnsureInitialized();
+            
+            var response = await LocalLobby.Browse(token: token);
+            
+            if (response.Error is not Error.Ok) return new List<LobbyDescriptor>();
+
+            return response.Response.Snapshots.Select(snapshot => new LobbyDescriptor
+            {
+                IsJoinable = true,
+                LobbyId = new ProviderId(snapshot.LobbyId.ToString()),
+                MaxMembers = snapshot.Capacity,
+                MemberCount = snapshot.Members.Count,
+                Name = snapshot.LobbyData.GetValueOrDefault(LobbyKeys.NameKey, "unnamed")
+            }).ToList();
         }
         public void Dispose() { }
     }

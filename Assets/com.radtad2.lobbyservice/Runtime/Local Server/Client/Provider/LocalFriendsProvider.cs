@@ -17,14 +17,9 @@ namespace LobbyService.LocalServer
             SupportsAvatars = false
         };
         
-        private void EnsureInitialized()
-        {
-            if (!LocalLobby.Initialized) throw new InvalidOperationException("LocalLobby must be initialized before use");
-        }
-        
         public void StartFriendPolling(FriendDiscoveryFilter filter, float intervalSeconds, CancellationToken token = default)
         {
-            EnsureInitialized();
+            LocalProvider.EnsureInitialized();
             
             _pollingInterval = intervalSeconds;
 
@@ -79,7 +74,10 @@ namespace LobbyService.LocalServer
 
         public void Dispose()
         {
-            // Resources cleaned up by controlling module
+            if (_friendCts is { IsCancellationRequested: false })
+            {
+                _friendCts.Cancel();
+            }
         }
     }
 }

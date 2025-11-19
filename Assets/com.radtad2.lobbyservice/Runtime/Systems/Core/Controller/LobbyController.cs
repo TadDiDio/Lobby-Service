@@ -79,8 +79,6 @@ namespace LobbyService
             _staleLobbyManager = new StaleLobbyManager();
             _viewModule = new ViewModule(this);
             SetProvider(provider);
-
-            Lobby.SetController(this);
         }
 
         public void Dispose()
@@ -164,15 +162,6 @@ namespace LobbyService
             {
                 _provider.Leave(staleId);
                 _staleLobbyManager.EraseId(_provider.GetType());
-            }
-            
-            if (_rules.AutoStartFriendPolling) Friends.StartPolling(_rules.FriendDiscoveryFilter, _rules.FriendPollingRateSeconds);
-            
-            if (_rules.AutoStartLobbies)
-            {
-                var request = _rules.AutoLobbyCreateRequest;
-                if (_rules.NameAutoLobbyAfterUser) request.Name = $"{LocalMember}'s Lobby";
-                Create(request);
             }
         }
 

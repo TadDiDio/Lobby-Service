@@ -234,20 +234,12 @@ namespace LobbyService.LocalServer
 
         public static async Task<RequestResponse<EnterResponse>> Create(CreateLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
         {
-           var response = await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
-           
-           if (response.Error is Error.Ok) CacheSnapshot(response.Response.Snapshot);
-           
-           return response;
+           return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
         }
         
         public static async Task<RequestResponse<EnterResponse>> Join(JoinLobbyRequest request, float timeoutSeconds = 3f, CancellationToken token = default)
         {
-            var response = await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
-
-            if (response.Error is Error.Ok) CacheSnapshot(response.Response.Snapshot);
-            
-            return response;
+            return await GetResponseAsync<EnterResponse>(request, timeoutSeconds, token);
         }
 
         public static void Leave(LeaveLobbyRequest request)
@@ -304,5 +296,17 @@ namespace LobbyService.LocalServer
         }
         
         #endregion
+
+        public static async Task<RequestResponse<BrowseResponse>> Browse(float timeoutSeconds = 3f, CancellationToken token = default)
+        {
+            var result = await GetResponseAsync<BrowseResponse>(new BrowseRequest(), timeoutSeconds, token);
+
+            if (result.Error is Error.Ok)
+            {
+                foreach (var snapshot in result.Response.Snapshots) CacheSnapshot(snapshot);
+            }
+            
+            return result;
+        }
     }
 }

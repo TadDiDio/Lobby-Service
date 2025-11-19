@@ -1,29 +1,35 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LobbyService
 {
     public class ModuleProxy<T> : DispatchProxy
     {
-        private IPreInitStrategy _strategy;
+        private UnInitWrapper _strategyWrapper;
         private T _target;
         
-        public void Initialize(IPreInitStrategy strategy)
+        public void Initialize(UnInitWrapper strategyWrapper)
         {
-            _strategy = strategy;
+            _strategyWrapper = strategyWrapper;
         }
         
         public void AttachTarget(T target)
         {
             _target = target;
         }
+
+        public void DetachTarget()
+        {
+            _target = default;
+        }
         
         protected override object Invoke(MethodInfo targetMethod, object[] args)
         {
             if (_target != null) return targetMethod.Invoke(_target, args);
             
-            _strategy.Handle(() => targetMethod.Invoke(_target, args));
+            if (Lobby.AllowingActions) _strategyWrapper.RegisterAction(() => targetMethod.Invoke(_target, args));
             return GetDefaultReturnValue(targetMethod.ReturnType);
         }
         

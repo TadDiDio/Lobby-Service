@@ -1,75 +1,133 @@
 using System;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 namespace LobbyService
 {
     public static class Lobby
     {
-        public static bool Initialized = false;
-        public static IBrowserAPI Browser { get; private set; }
-        public static IFriendAPI Friends { get; private set; }
-        public static IChatAPI Chat { get; private set; }
-        public static IProcedureAPI Procedure { get; private set; }
+        /// <summary>
+        /// Holds actions for lobby browsing.
+        /// </summary>
+        public static IBrowserAPI Browser { get; }
+        
+        /// <summary>
+        /// Holds actions for managing lobby friends.
+        /// </summary>
+        public static IFriendAPI Friends { get; }
+        
+        /// <summary>
+        /// Holds actions for lobby chat.
+        /// </summary>
+        public static IChatAPI Chat { get; }
+        
+        /// <summary>
+        /// Holds actions for lobby procedures.
+        /// </summary>
+        public static IProcedureAPI Procedure { get; }
+        
+        /// <summary>
+        /// Whether the lobby is allowing actions to be run or queued.
+        /// True when in playmode, false otherwise.
+        /// </summary>
+        public static bool AllowingActions { get; private set; }
         
         private static LobbyController _controller;
-        private static IPreInitStrategy _preInitStrategy = new DropPreInitStrategy();
+        private static UnInitWrapper _unInitWrapper;
+        private static LobbyRules _rules = new();
         
-        public static void Initialize(IPreInitStrategy strategy = null)
+        static Lobby()
         {
-            if (Initialized) return;
+            _unInitWrapper = new UnInitWrapper(new ExecuteUnInitStrategy());
             
-            if (strategy != null) _preInitStrategy = strategy;
-            
-            var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_preInitStrategy);
-            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
-            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitStrategy);
+            var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_unInitWrapper);
+            browserProxy.Filter = ModuleProxyFactory.Create<IBrowserFilterAPI>(_unInitWrapper);
+            browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_unInitWrapper);
             Browser = browserProxy;
             
-            Friends = ModuleProxyFactory.Create<IFriendAPI>(_preInitStrategy);
-            Chat =  ModuleProxyFactory.Create<IChatAPI>(_preInitStrategy);
-            Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_preInitStrategy);
-            
-            Initialized = true;
-        }
-
-        public static void Shutdown()
-        {
-            if (!Initialized) return;
-            
-            Initialized = false;
-            _preInitStrategy = new DropPreInitStrategy();
-            if (_controller == null) return;
-            _controller.Dispose();
-            _controller = null;
-
-            Browser = null;
-            Friends = null;
-            Chat = null;
-            Procedure = null;
+            Friends = ModuleProxyFactory.Create<IFriendAPI>(_unInitWrapper);
+            Chat =  ModuleProxyFactory.Create<IChatAPI>(_unInitWrapper);
+            Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_unInitWrapper);
         }
         
-        public static void SetController(LobbyController controller)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void OnEnterPlayMode()
         {
-            _controller = controller;
-            
+            AllowingActions = true;
+            Application.quitting += Shutdown;
+        }
+        private static void Shutdown()
+        {
+            AllowingActions = false;
+
+            if (_controller != null)
+            {
+                _controller.Dispose();
+                _controller = null;
+            }
+
             // ReSharper disable SuspiciousTypeConversion.Global
-            ((ModuleProxy<IBrowserAPIInternal>)Browser)?.AttachTarget(_controller.Browser);
-            ((ModuleProxy<IFriendAPI>)Friends).AttachTarget(_controller.Friends);
-            ((ModuleProxy<IChatAPI>)Chat).AttachTarget(_controller.Chat);
-            ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
+            ((ModuleProxy<IBrowserAPIInternal>)Browser)?.DetachTarget();
+            ((ModuleProxy<IFriendAPI>)Friends).DetachTarget();
+            ((ModuleProxy<IChatAPI>)Chat).DetachTarget();
+            ((ModuleProxy<IProcedureAPI>)Procedure).DetachTarget();
             // ReSharper restore SuspiciousTypeConversion.Global
+            
+            _unInitWrapper.Reset(new ExecuteUnInitStrategy());
+        }
+        
+        /// <summary>
+        /// Determines what to do with all previous and future calls before a provider is set.
+        /// </summary>
+        /// <param name="strategy">The strategy to use.</param>
+        /// <remarks>Changing this will also affect all previous lobby actions since they are buffered
+        /// until a provider is set.</remarks>
+        public static void SetUnInitStrategy(IUnInitStrategy strategy)
+        {
+            if (strategy == null) return;
+            _unInitWrapper.SetStrategy(strategy);
         }
 
+        public static void SetRules(LobbyRules rules)
+        {
+            if (rules != null) _rules = rules;
+        }
+        
         /// <summary>
         /// Safely sets a new provider for the controller. 
         /// </summary>
         /// <param name="newProvider">The new provider.</param>
-        public static void SetProvider(BaseProvider newProvider) => Dispatch(() => _controller.SetProvider(newProvider));
+        public static void SetProvider(BaseProvider newProvider)
+        {
+            if (_controller == null)
+            {
+                _controller = new LobbyController(newProvider, _rules);
+                
+                // ReSharper disable SuspiciousTypeConversion.Global
+                ((ModuleProxy<IBrowserAPIInternal>)Browser)?.AttachTarget(_controller.Browser);
+                ((ModuleProxy<IFriendAPI>)Friends).AttachTarget(_controller.Friends);
+                ((ModuleProxy<IChatAPI>)Chat).AttachTarget(_controller.Chat);
+                ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
+                // ReSharper restore SuspiciousTypeConversion.Global
+                
+                if (_rules.AutoStartFriendPolling) Friends.StartPolling(_rules.FriendDiscoveryFilter, _rules.FriendPollingRateSeconds);
             
+                if (_rules.AutoStartLobbies)
+                {
+                    var request = _rules.AutoLobbyCreateRequest;
+                    if (_rules.NameAutoLobbyAfterUser) request.Name = $"{LocalMember}'s Lobby";
+                    Create(request);
+                }
+            }
+            else _controller.SetProvider(newProvider);
+        }
+
         #region Core
         private static void Dispatch(Action call)
         {
-            if (_controller == null) _preInitStrategy.Handle(call);
+            if (!AllowingActions) return;
+            
+            if (_controller == null) _unInitWrapper.RegisterAction(call);
             else call();
         }
         
