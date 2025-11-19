@@ -8,7 +8,7 @@ namespace LobbyService.Example
     public class LobbyCard : MonoBehaviour
     {
         public Button joinButton;
-        public TMP_Text name;
+        public TMP_Text nameText;
         public TMP_Text capacity;
         
         public void Initialize(LobbyDescriptor descriptor)
@@ -18,7 +18,7 @@ namespace LobbyService.Example
                 LobbyId = descriptor.LobbyId
             }));
 
-            name.text = Lobby.GetLobbyDataOrDefault(LobbyKeys.NameKey, "Unnamed Lobby", descriptor.LobbyId);
+            nameText.text = Lobby.GetLobbyDataOrDefault(LobbyKeys.NameKey, "Unnamed Lobby", descriptor.LobbyId);
             capacity.text = $"{descriptor.MemberCount} / {descriptor.Capacity}";
         }
     }

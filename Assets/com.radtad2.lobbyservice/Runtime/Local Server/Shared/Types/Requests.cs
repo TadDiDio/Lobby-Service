@@ -94,4 +94,15 @@ namespace LobbyService.LocalServer
     {
         public int Max { get; set; }
     }
+
+    public class ChatMessageRequest : IRequest
+    {
+        public string Message { get; set; }
+    }
+    
+    public class DirectMessageRequest : IRequest
+    {
+        public string TargetId { get; set; }
+        public string Message { get; set; }
+    }
 }

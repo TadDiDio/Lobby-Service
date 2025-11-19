@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using LobbyService.LocalServer;
 using TMPro;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace LobbyService.Example
 {
-    public class SampleView : MonoBehaviour, ICoreView, IFriendView, IBrowserView
+    public class SampleView : MonoBehaviour, ICoreView, IFriendView, IBrowserView, IChatView
     {
         public TMP_Text lobbyNameText;
         public TMP_Text localUserText;
@@ -41,6 +42,9 @@ namespace LobbyService.Example
         public TMP_InputField searchName;
         public TMP_Text slotsAvailableText;
         public Slider slotsAvailableSlider;
+
+        public TMP_Text chatLog;
+        public TMP_InputField chatInput;
         
         private LobbyInvite? _invite;
         
@@ -64,6 +68,8 @@ namespace LobbyService.Example
             searchButton.onClick.AddListener(Browse);
             slotsAvailableSlider.onValueChanged.AddListener(UpdateSearchCapacityText);
             slotsAvailableText.text = $"Slots available: {slotsAvailableSlider.value}";
+            
+            chatInput.onEndEdit.AddListener(SendChat);
         }
 
         private void OnDestroy()
@@ -80,6 +86,12 @@ namespace LobbyService.Example
             slotsAvailableSlider.onValueChanged.RemoveAllListeners();
         }
 
+        private void SendChat(string message)
+        {
+            Lobby.Chat.SendChatMessage(message);
+            chatInput.text = string.Empty;
+        }
+        
         private void UpdateSearchCapacityText(float value)
         {
             slotsAvailableText.text = $"Slots available: {slotsAvailableSlider.value}";
@@ -443,6 +455,16 @@ namespace LobbyService.Example
         public void DisplayClearedAllSorters()
         {
            
+        }
+
+        public void DisplayMessage(LobbyChatMessage message)
+        {
+            chatLog.text += $"[{message.Sender}] {message.Content}\n";
+        }
+
+        public void DisplayDirectMessage(LobbyChatMessage message)
+        {
+            
         }
     }
 }

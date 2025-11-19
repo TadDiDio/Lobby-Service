@@ -347,5 +347,19 @@ namespace LobbyService.LocalServer
             SendCommand(request);
         }
         #endregion
+        
+        #region Chat
+
+        public static void SendChatMessage(ChatMessageRequest message)
+        {
+            SendCommand(message);
+        }
+        
+        public static void SendDirectMessage(DirectMessageRequest message)
+        {
+            SendCommand(message);
+        }
+        
+        #endregion
     }
 }
