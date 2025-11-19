@@ -1,3 +1,5 @@
+using System;
+
 namespace LobbyService
 {
     public class BrowserFilterModule : IBrowserFilterAPI
@@ -35,8 +37,9 @@ namespace LobbyService
             _viewBus.DisplayRemovedStringFilter(key);
         }
 
-        public void SetSlotsAvailableFilter(int slots)
+        public void AddSlotsAvailableFilter(int slots)
         {
+            if (slots <= 0) throw new ArgumentException("Slots must be greater than zero");
             _filter.SetSlotsAvailableFilter(slots);
             _viewBus.DisplaySetSlotsAvailableFilter(slots);
         }
@@ -49,6 +52,7 @@ namespace LobbyService
 
         public void SetLimitResponsesFilter(int limit)
         {
+            if (limit <= 0) throw new ArgumentException("Limit must be greater than zero");
             _filter.SetLimitResponsesFilter(limit);
             _viewBus.DisplaySetLimitResponsesFilter(limit);        
         }
@@ -59,7 +63,7 @@ namespace LobbyService
             _viewBus.DisplayClearLimitResponsesFilter();
         }
 
-        public void SetDistanceFilter(LobbyDistance filter)
+        public void AddDistanceFilter(LobbyDistance filter)
         {
             _filter.SetDistanceFilter(filter);
             _viewBus.DisplayAddedDistanceFilter(filter);

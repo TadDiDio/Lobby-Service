@@ -16,12 +16,12 @@ namespace LobbyService
     /// </summary>
     public enum ComparisonType
     {
-        NotEqual,
-        LessThan,
-        LessThanOrEqual,
-        Equal,
-        GreaterThan,
-        GreaterThanOrEqual
+        NotEqual = 0,
+        LessThan = 1,
+        LessThanOrEqual = 2,
+        Equal = 3,
+        GreaterThan = 4,
+        GreaterThanOrEqual = 5
     }
 
     /// <summary>

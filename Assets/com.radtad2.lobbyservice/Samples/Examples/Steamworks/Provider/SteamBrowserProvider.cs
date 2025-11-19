@@ -37,7 +37,7 @@ namespace LobbyService.Example.Steam
                     LobbyId = new ProviderId(steamId.ToString()),
                     Name = SteamMatchmaking.GetLobbyData(steamId, SteamLobbyKeys.Name),
                     MemberCount = SteamMatchmaking.GetNumLobbyMembers(steamId),
-                    MaxMembers = SteamMatchmaking.GetLobbyMemberLimit(steamId),
+                    Capacity = SteamMatchmaking.GetLobbyMemberLimit(steamId),
 
                     // Steam only returns lobbies that are public or invisible, and also joinable.
                     IsJoinable = true

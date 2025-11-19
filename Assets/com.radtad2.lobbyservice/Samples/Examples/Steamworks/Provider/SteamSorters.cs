@@ -14,7 +14,7 @@ namespace LobbyService.Example.Steam
     {
         public int CompareTo(LobbyDescriptor a, LobbyDescriptor b)
         {
-            return -Comparer<int>.Default.Compare(a.MaxMembers, b.MaxMembers);
+            return -Comparer<int>.Default.Compare(a.Capacity, b.Capacity);
         }
     }
 }

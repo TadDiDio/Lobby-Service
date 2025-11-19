@@ -13,6 +13,8 @@ namespace LobbyService.LocalServer
         {
             LocalProvider.EnsureInitialized();
             
+            Filter.ApplyFilters();
+            
             var response = await LocalLobby.Browse(token: token);
             
             if (response.Error is not Error.Ok) return new List<LobbyDescriptor>();
@@ -21,7 +23,7 @@ namespace LobbyService.LocalServer
             {
                 IsJoinable = true,
                 LobbyId = new ProviderId(snapshot.LobbyId.ToString()),
-                MaxMembers = snapshot.Capacity,
+                Capacity = snapshot.Capacity,
                 MemberCount = snapshot.Members.Count,
                 Name = snapshot.LobbyData.GetValueOrDefault(LobbyKeys.NameKey, "unnamed")
             }).ToList();

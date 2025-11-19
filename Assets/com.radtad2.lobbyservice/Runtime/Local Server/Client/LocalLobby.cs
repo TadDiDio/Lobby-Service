@@ -86,6 +86,7 @@ namespace LobbyService.LocalServer
 
         public static void Shutdown()
         {
+            Debug.Log("[Local Lobby] Shutting down...");
             if (!Initialized) return;
             Initialized = false;
             Application.quitting -= Shutdown;
@@ -286,11 +287,20 @@ namespace LobbyService.LocalServer
 
         public static string GetLobbyDataOrDefault(string lobbyId, string key, string defaultValue)
         {
+            if (_cachedLobbies.TryGetValue(lobbyId, out var lobby))
+            {
+                return lobby.LobbyData.GetValueOrDefault(key, defaultValue);
+            }
             return defaultValue;
         }
 
         public static string GetMemberDataOrDefault(string lobbyId, string memberId, string key, string defaultValue)
         {
+            if (!Guid.TryParse(memberId, out var id)) return defaultValue;
+            if (_cachedLobbies.TryGetValue(lobbyId, out var lobby) && lobby.MemberData.TryGetValue(id, out var data))
+            {
+                return data.GetValueOrDefault(key, defaultValue);
+            }
             return defaultValue;
         }
         #endregion
@@ -304,6 +314,7 @@ namespace LobbyService.LocalServer
         
         #endregion
 
+        #region Browsing
         public static async Task<RequestResponse<BrowseResponse>> Browse(float timeoutSeconds = 3f, CancellationToken token = default)
         {
             var result = await GetResponseAsync<BrowseResponse>(new BrowseRequest(), timeoutSeconds, token);
@@ -315,5 +326,26 @@ namespace LobbyService.LocalServer
             
             return result;
         }
+
+        public static void ApplyNumberFilter(ApplyNumberFilterRequest request)
+        {
+            SendCommand(request);
+        }
+        
+        public static void ApplyStringFilter(ApplyStringFilterRequest request)
+        {
+            SendCommand(request);
+        }
+        
+        public static void ApplySlotsAvailableFilter(ApplySlotsAvailableFilterRequest request)
+        {
+            SendCommand(request);
+        }
+        
+        public static void ApplyLimitResponsesFilter(ApplyLimitResponsesFilterRequest request)
+        {
+            SendCommand(request);
+        }
+        #endregion
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace LobbyService.LocalServer
 {
     public class LocalBrowserFilterProvider : IBrowserFilterProvider
@@ -10,65 +12,100 @@ namespace LobbyService.LocalServer
             SupportsStringFiltering = true,
             SupportsNumberFiltering = true
         };
-            
+
+        private Dictionary<string, LobbyNumberFilter> _numberFilters = new();
+        private Dictionary<string, LobbyStringFilter> _stringFilters = new();
+        
+        private int _maxSearchResults;
+        private int _slotsAvailableFilter;
+        
         public void ApplyFilters()
         {
-            throw new System.NotImplementedException();
+            foreach (var filter in _numberFilters.Values)
+            {
+                LocalLobby.ApplyNumberFilter(new ApplyNumberFilterRequest
+                {
+                    Key = filter.Key,
+                    Value = filter.Value,
+                    ComparisonType = (int)filter.ComparisonType
+                });
+            }
+
+            foreach (var filter in _stringFilters.Values)
+            {
+                LocalLobby.ApplyStringFilter(new ApplyStringFilterRequest
+                {
+                    Key = filter.Key,
+                    Value = filter.Value,
+                });
+            }
+            
+            if (_maxSearchResults > 0) LocalLobby.ApplyLimitResponsesFilter(new ApplyLimitResponsesFilterRequest
+            {
+                Max = _maxSearchResults,
+            });
+            if (_slotsAvailableFilter > 0) LocalLobby.ApplySlotsAvailableFilter(new ApplySlotsAvailableFilterRequest
+            {
+                Min = _slotsAvailableFilter
+            });
         }
 
         public void AddNumberFilter(LobbyNumberFilter filter)
         {
-            throw new System.NotImplementedException();
+            _numberFilters[filter.Key] = filter;
         }
 
         public void AddStringFilter(LobbyStringFilter filter)
         {
-            throw new System.NotImplementedException();
+            _stringFilters[filter.Key] = filter;
         }
 
         public void RemoveNumberFilter(string key)
         {
-            throw new System.NotImplementedException();
+            _numberFilters.Remove(key);
         }
 
         public void RemoveStringFilter(string key)
         {
-            throw new System.NotImplementedException();
+            _stringFilters.Remove(key);
         }
 
         public void SetSlotsAvailableFilter(int slots)
         {
-            throw new System.NotImplementedException();
+            _slotsAvailableFilter = slots;
         }
 
         public void ClearSlotsAvailableFilter()
         {
-            throw new System.NotImplementedException();
+            _slotsAvailableFilter = 0;
         }
 
         public void SetLimitResponsesFilter(int limit)
         {
-            throw new System.NotImplementedException();
+            _maxSearchResults = limit;
         }
 
         public void ClearLimitResponsesFilter()
         {
-            throw new System.NotImplementedException();
+            _maxSearchResults = 0;
         }
 
         public void SetDistanceFilter(LobbyDistance value)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public void ClearDistanceFilter()
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public void ClearAllFilters()
         {
-            throw new System.NotImplementedException();
+            _numberFilters.Clear();
+            _stringFilters.Clear();
+            _maxSearchResults = 0;
+            _slotsAvailableFilter = 0;
         }
     }
 }

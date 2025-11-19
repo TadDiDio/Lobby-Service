@@ -30,7 +30,7 @@ namespace LobbyService
         /// Sets a number of slots that need to be available.
         /// </summary>
         /// <param name="slots">The number of slots.</param>
-        public void SetSlotsAvailableFilter(int slots);
+        public void AddSlotsAvailableFilter(int slots);
 
         /// <summary>
         /// Clears the available slots filter.
@@ -52,7 +52,7 @@ namespace LobbyService
         /// Sets a distance filter. Only lobbies within this distance value will be returned.
         /// </summary>
         /// <param name="filter">The max distance to allow.</param>
-        public void SetDistanceFilter(LobbyDistance filter);
+        public void AddDistanceFilter(LobbyDistance filter);
 
         /// <summary>
         /// Clears the distance filter.

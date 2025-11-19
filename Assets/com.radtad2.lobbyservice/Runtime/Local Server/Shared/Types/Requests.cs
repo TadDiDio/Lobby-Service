@@ -62,4 +62,36 @@ namespace LobbyService.LocalServer
     public class QueryFriendsRequest : IRequest { }
 
     public class BrowseRequest : IRequest { }
+
+    public class ApplyNumberFilterRequest : IRequest
+    {
+        public string Key { get; set; }
+        public int Value { get; set; }
+
+        /// <summary>
+        /// 0 = NotEqual
+        /// 1 = LessThan
+        /// 2 = LessThanOrEqual
+        /// 3 = Equal
+        /// 4 = GreaterThan
+        /// 5 = GreaterThanOrEqual
+        /// </summary>
+        public int ComparisonType { get; set; }
+    }
+    
+    public class ApplyStringFilterRequest : IRequest
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+    
+    public class ApplySlotsAvailableFilterRequest : IRequest
+    {
+        public int Min { get; set; }
+    }
+    
+    public class ApplyLimitResponsesFilterRequest : IRequest
+    {
+        public int Max { get; set; }
+    }
 }

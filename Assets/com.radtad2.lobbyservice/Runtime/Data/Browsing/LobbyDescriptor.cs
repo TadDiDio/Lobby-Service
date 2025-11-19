@@ -22,7 +22,7 @@ namespace LobbyService
         /// <summary>
         /// The max allowed members.
         /// </summary>
-        public int MaxMembers;
+        public int Capacity;
 
         /// <summary>
         /// True if this lobby is joinable.
@@ -34,7 +34,7 @@ namespace LobbyService
             return $"Id: {LobbyId}{Environment.NewLine}" +
                    $"Name: {Name}{Environment.NewLine}" +
                    $"Member Count: {MemberCount}{Environment.NewLine}" +
-                   $"Capacity: {MaxMembers}{Environment.NewLine}" +
+                   $"Capacity: {Capacity}{Environment.NewLine}" +
                    $"IsJoinable: {IsJoinable}";
         }
     }

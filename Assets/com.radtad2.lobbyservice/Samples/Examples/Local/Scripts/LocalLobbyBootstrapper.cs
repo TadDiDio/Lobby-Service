@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using LobbyService.Example;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace LobbyService.LocalServer.Example
 {
@@ -51,15 +50,6 @@ namespace LobbyService.LocalServer.Example
             catch (Exception e)
             {
                 Debug.LogException(e);
-            }
-        }
-
-        private void Update()
-        {
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            {
-                if (LocalLobby.Initialized) LocalLobby.Shutdown();
-                else _ = LocalLobby.WaitForInitializationAsync(destroyCancellationToken);
             }
         }
     }

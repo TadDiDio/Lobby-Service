@@ -2,12 +2,11 @@ using System.Collections.Generic;
 using LobbyService.LocalServer;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace LobbyService.Example
 {
-    public class SampleView : MonoBehaviour, ICoreView, IFriendView
+    public class SampleView : MonoBehaviour, ICoreView, IFriendView, IBrowserView
     {
         public TMP_Text lobbyNameText;
         public TMP_Text localUserText;
@@ -33,10 +32,21 @@ namespace LobbyService.Example
 
         public Button leaveButton;
         public Button closeButton;
+
+        public Button toggleBrowserButton;
+        public GameObject browserPanel;
+        public GameObject browserContainer;
+        public GameObject lobbyCardPrefab;
+        public Button searchButton;
+        public TMP_InputField searchName;
+        public TMP_Text slotsAvailableText;
+        public Slider slotsAvailableSlider;
         
         private LobbyInvite? _invite;
         
+        
         private Dictionary<LobbyMember, MemberCard> _members = new();
+        private List<GameObject> _browserLobbies = new();
         
         private void Awake()
         {
@@ -49,6 +59,11 @@ namespace LobbyService.Example
             
             leaveButton.onClick.AddListener(Leave);
             closeButton.onClick.AddListener(Close);
+            
+            toggleBrowserButton.onClick.AddListener(ToggleBrowser);
+            searchButton.onClick.AddListener(Browse);
+            slotsAvailableSlider.onValueChanged.AddListener(UpdateSearchCapacityText);
+            slotsAvailableText.text = $"Slots available: {slotsAvailableSlider.value}";
         }
 
         private void OnDestroy()
@@ -60,8 +75,38 @@ namespace LobbyService.Example
             rejectInviteButton.onClick.RemoveAllListeners();
             leaveButton.onClick.RemoveAllListeners();
             closeButton.onClick.RemoveAllListeners();
+            toggleBrowserButton.onClick.RemoveAllListeners();
+            searchButton.onClick.RemoveAllListeners();
+            slotsAvailableSlider.onValueChanged.RemoveAllListeners();
         }
 
+        private void UpdateSearchCapacityText(float value)
+        {
+            slotsAvailableText.text = $"Slots available: {slotsAvailableSlider.value}";
+        }
+        
+        private void Browse()
+        {
+            Lobby.Browser.Filter.AddSlotsAvailableFilter((int)slotsAvailableSlider.value);
+            
+            if (!string.IsNullOrEmpty(searchName.text))
+            {
+                Debug.Log("aplpying name:" + searchName.text);
+                Lobby.Browser.Filter.AddStringFilter(new LobbyStringFilter
+                {
+                    Key = LobbyKeys.NameKey,
+                    Value = searchName.text
+                });
+            }
+            
+            Lobby.Browser.Browse();
+        }
+        
+        private void ToggleBrowser()
+        {
+            browserPanel.SetActive(!browserPanel.activeSelf);
+        }
+        
         private void ToggleFriends()
         {
             friendsPanel.SetActive(!friendsPanel.activeSelf);
@@ -95,7 +140,7 @@ namespace LobbyService.Example
             {
                 Capacity = (int)capacitySlider.value,
                 LobbyType =  LobbyType.Public,
-                Name = nameInput.text
+                Name = string.IsNullOrEmpty(nameInput.text) ? $"{Lobby.LocalMember.DisplayName}'s Lobby" : nameInput.text
             });
         }
 
@@ -311,21 +356,93 @@ namespace LobbyService.Example
             _invite = null;
         }
 
-        private void Update()
+        public void DisplayStartedBrowsing()
         {
-            if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            foreach (var lobby in _browserLobbies)
             {
-                Lobby.SetLobbyData(LobbyKeys.NameKey, "Test name lol");
+                Destroy(lobby.gameObject);
             }
-            
-            if (Keyboard.current.digit2Key.wasPressedThisFrame)
-            {
-                var ready = Lobby.GetMemberDataOrDefault(Lobby.LocalMember, LobbyKeys.ReadyKey, "false");
+            _browserLobbies.Clear();
+        }
 
-                var flag = bool.Parse(ready);
-                
-                Lobby.SetMemberData(LobbyKeys.ReadyKey, (!flag).ToString());
+        public void DisplayBrowsingResult(List<LobbyDescriptor> lobbies)
+        {
+            foreach (var lobby in lobbies)
+            {
+                var card = Instantiate(lobbyCardPrefab, browserContainer.transform);
+                _browserLobbies.Add(card);
+                card.GetComponent<LobbyCard>().Initialize(lobby);
             }
+        }   
+
+        public void DisplayAddedNumberFilter(LobbyNumberFilter filter)
+        {
+            
+        }
+
+        public void DisplayAddedStringFilter(LobbyStringFilter filter)
+        {
+            
+        }
+
+        public void DisplayRemovedNumberFilter(string key)
+        {
+            
+        }
+
+        public void DisplayRemovedStringFilter(string key)
+        {
+            
+        }
+
+        public void DisplaySetSlotsAvailableFilter(int numAvailable)
+        {
+            
+        }
+
+        public void DisplayClearedSlotsAvailableFilter()
+        {
+            
+        }
+
+        public void DisplaySetLimitResponsesFilter(int limit)
+        {
+            
+        }
+
+        public void DisplayClearLimitResponsesFilter()
+        {
+            
+        }
+
+        public void DisplayAddedDistanceFilter(LobbyDistance filter)
+        {
+            
+        }
+
+        public void DisplayClearedDistanceFilter()
+        {
+            
+        }
+
+        public void DisplayClearedAllFilters()
+        {
+            
+        }
+
+        public void DisplayAddedSorter(ILobbySorter sorter, string key)
+        {
+            
+        }
+
+        public void DisplayRemovedSorter(string key)
+        {
+            
+        }
+
+        public void DisplayClearedAllSorters()
+        {
+           
         }
     }
 }
