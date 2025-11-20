@@ -86,8 +86,9 @@ namespace LobbyService.LocalServer
 
         public static void Shutdown()
         {
-            Debug.Log("[Local Lobby] Shutting down...");
             if (!Initialized) return;
+            
+            Debug.Log("[Local Lobby] Shutting down...");
             Initialized = false;
             Application.quitting -= Shutdown;
             
@@ -226,6 +227,14 @@ namespace LobbyService.LocalServer
                 case OwnerUpdateEvent update:
                     OnOwnerUpdated?.Invoke(update.NewOwner.ToLobbyMember());
                     break;
+                case ChatEvent chat:
+                    OnChat?.Invoke(new LobbyChatMessage
+                    {
+                        Sender = chat.Sender.ToLobbyMember(),
+                        Content = chat.Content,
+                        Direct = chat.Direct,
+                    });
+                    break;
             }
         }
         
@@ -237,6 +246,7 @@ namespace LobbyService.LocalServer
         public static event Action<LobbyDataUpdate> OnLobbyDataUpdated;
         public static event Action<MemberDataUpdate> OnMemberDataUpdated;
         public static event Action<LobbyMember> OnOwnerUpdated;
+        public static event Action<LobbyChatMessage> OnChat;
         
         public static LobbyMember GetLocalUser() => _localUser;
 

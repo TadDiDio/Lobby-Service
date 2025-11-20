@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace LobbyService
 {
     public enum LobbyMessageType
@@ -7,17 +5,12 @@ namespace LobbyService
         /// <summary>
         /// A message sent from a member to the entire chat.
         /// </summary>
-        General,
+        General = 0,
 
         /// <summary>
         /// A message sent from a member to just one member.
         /// </summary>
-        Direct,
-
-        /// <summary>
-        /// A lobby update such as member joining or being promoted to owner.
-        /// </summary>
-        Update
+        Direct = 1,
     }
 
     /// <summary>
@@ -31,19 +24,13 @@ namespace LobbyService
         public LobbyMember Sender;
 
         /// <summary>
-        /// The message type.
-        /// </summary>
-        public LobbyMessageType Type;
-
-        /// <summary>
         /// The content of the message.
         /// </summary>
         public string Content;
 
         /// <summary>
-        /// Optional metadata if needed, i.e. joined, left, kicked, promoted, etc.
+        /// Tells if the message was direct or general.
         /// </summary>
-        /// <remarks>Only valid if Type is Update.</remarks>
-        [CanBeNull] public string Meta;
+        public bool Direct;
     }
 }

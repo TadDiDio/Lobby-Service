@@ -97,11 +97,13 @@ namespace LobbyService.LocalServer
 
     public class ChatMessageRequest : IRequest
     {
+        public string LobbyId { get; set; }
         public string Message { get; set; }
     }
     
     public class DirectMessageRequest : IRequest
     {
+        public string LobbyId { get; set; }
         public string TargetId { get; set; }
         public string Message { get; set; }
     }

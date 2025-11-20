@@ -55,4 +55,11 @@ namespace LobbyService.LocalServer
     {
         public LocalLobbyMember NewOwner { get; set; }
     }
+
+    public class ChatEvent : IEvent
+    {
+        public LocalLobbyMember Sender { get; set; }
+        public string Content { get; set; }
+        public bool Direct { get; set; }
+    }
 }

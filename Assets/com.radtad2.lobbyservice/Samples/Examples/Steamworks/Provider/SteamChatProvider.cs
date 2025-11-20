@@ -70,7 +70,7 @@ namespace LobbyService.Example.Steam
                 {
                     Content = message,
                     Sender = sender,
-                    Type = LobbyMessageType.Direct
+                    Direct = true
                 });
                 return;
             }
@@ -80,7 +80,7 @@ namespace LobbyService.Example.Steam
             {
                 Content = text,
                 Sender = sender,
-                Type = LobbyMessageType.General
+                Direct = false
             });
         }
 

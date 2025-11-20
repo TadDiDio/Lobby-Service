@@ -1,9 +1,13 @@
 using System.Collections.Generic;
+using System.Linq;
 using LobbyService.LocalServer;
 using TMPro;
-using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
+using Slider = UnityEngine.UI.Slider;
 
 namespace LobbyService.Example
 {
@@ -45,13 +49,15 @@ namespace LobbyService.Example
 
         public TMP_Text chatLog;
         public TMP_InputField chatInput;
+        public GameObject chatPanel;
+        public ScrollRect chatView;
         
         private LobbyInvite? _invite;
         
         
         private Dictionary<LobbyMember, MemberCard> _members = new();
         private List<GameObject> _browserLobbies = new();
-        
+        private bool _queueScrollDown;        
         private void Awake()
         {
             createButton.onClick.AddListener(Create);
@@ -68,8 +74,7 @@ namespace LobbyService.Example
             searchButton.onClick.AddListener(Browse);
             slotsAvailableSlider.onValueChanged.AddListener(UpdateSearchCapacityText);
             slotsAvailableText.text = $"Slots available: {slotsAvailableSlider.value}";
-            
-            chatInput.onEndEdit.AddListener(SendChat);
+            chatInput.onSubmit.AddListener(SendChat);
         }
 
         private void OnDestroy()
@@ -84,12 +89,15 @@ namespace LobbyService.Example
             toggleBrowserButton.onClick.RemoveAllListeners();
             searchButton.onClick.RemoveAllListeners();
             slotsAvailableSlider.onValueChanged.RemoveAllListeners();
+            chatInput.onSubmit.RemoveAllListeners();
         }
 
         private void SendChat(string message)
         {
             Lobby.Chat.SendChatMessage(message);
             chatInput.text = string.Empty;
+            _queueScrollDown = true;
+            chatInput.ActivateInputField();
         }
         
         private void UpdateSearchCapacityText(float value)
@@ -103,7 +111,6 @@ namespace LobbyService.Example
             
             if (!string.IsNullOrEmpty(searchName.text))
             {
-                Debug.Log("aplpying name:" + searchName.text);
                 Lobby.Browser.Filter.AddStringFilter(new LobbyStringFilter
                 {
                     Key = LobbyKeys.NameKey,
@@ -229,6 +236,7 @@ namespace LobbyService.Example
             }
             
             leaveButton.gameObject.SetActive(true);
+            chatPanel.SetActive(true);
             SetViewIsOwner(Lobby.IsOwner);
         }
         
@@ -238,6 +246,8 @@ namespace LobbyService.Example
             lobbyNameText.text = "Create or join a lobby";
 
             leaveButton.gameObject.SetActive(false);
+            chatPanel.SetActive(false);
+            chatLog.text = string.Empty;
             SetViewIsOwner(false);
             
             foreach (var member in _members.Values)
@@ -459,12 +469,25 @@ namespace LobbyService.Example
 
         public void DisplayMessage(LobbyChatMessage message)
         {
-            chatLog.text += $"[{message.Sender}] {message.Content}\n";
+            var color = message.Sender == Lobby.LocalMember ? "00FF00" : "0000FF"; 
+            chatLog.text += $"<color=#{color}>[{message.Sender}]</color> {message.Content}\n";
+            _queueScrollDown = true;
         }
 
         public void DisplayDirectMessage(LobbyChatMessage message)
         {
-            
+            var color = message.Sender == Lobby.LocalMember ? "00FF00" : "0000FF"; 
+            chatLog.text += $"<color=#{color}>[{message.Sender} <whisper>]</color> {message.Content}\n";
+            _queueScrollDown = true;
+        }
+
+        private void Update()
+        {
+            if (_queueScrollDown)
+            {
+                _queueScrollDown = false;                
+                chatView.verticalNormalizedPosition = 0;
+            }
         }
     }
 }
