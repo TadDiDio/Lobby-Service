@@ -523,7 +523,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyService.Example.LobbyCard
   joinButton: {fileID: 4701447159870197778}
-  name: {fileID: 4346403700723798763}
+  nameText: {fileID: 4346403700723798763}
   capacity: {fileID: 7855504854438221422}
 --- !u!1 &9152847172428457156
 GameObject:

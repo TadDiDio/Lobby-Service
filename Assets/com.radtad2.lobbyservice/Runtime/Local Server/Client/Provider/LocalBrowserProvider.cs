@@ -19,7 +19,7 @@ namespace LobbyService.LocalServer
             
             if (response.Error is not Error.Ok) return new List<LobbyDescriptor>();
 
-            return response.Response.Snapshots.Select(snapshot => new LobbyDescriptor
+            var result = response.Response.Snapshots.Select(snapshot => new LobbyDescriptor
             {
                 IsJoinable = true,
                 LobbyId = new ProviderId(snapshot.LobbyId.ToString()),
@@ -27,6 +27,10 @@ namespace LobbyService.LocalServer
                 MemberCount = snapshot.Members.Count,
                 Name = snapshot.LobbyData.GetValueOrDefault(LobbyKeys.NameKey, "unnamed")
             }).ToList();
+
+            Sorter.ApplySorters(result);
+            
+            return result;
         }
         public void Dispose() { }
     }

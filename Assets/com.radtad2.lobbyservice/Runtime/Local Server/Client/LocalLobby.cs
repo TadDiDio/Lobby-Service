@@ -356,6 +356,7 @@ namespace LobbyService.LocalServer
         {
             SendCommand(request);
         }
+        
         #endregion
         
         #region Chat

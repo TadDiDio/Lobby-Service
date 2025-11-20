@@ -1,27 +1,33 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LobbyService.LocalServer
 {
     public class LocalBrowserSorterProvider : IBrowserSorterProvider
     {
+        private List<(string Key, ILobbySorter Sorter)> _sorters = new();
+        
         public void ApplySorters(List<LobbyDescriptor> lobbies)
         {
-            throw new System.NotImplementedException();
+            var comparer = new CompositeLobbySorterComparer(_sorters.Select(s => s.Sorter));
+
+            lobbies.Sort(comparer);
         }
 
         public void AddSorter(ILobbySorter sorter, string key)
         {
-            throw new System.NotImplementedException();
+            _sorters.Add((key, sorter));
         }
 
         public void RemoveSorter(string key)
         {
-            throw new System.NotImplementedException();
+            int index = _sorters.FindIndex(s => s.Key == key);
+            if (index >= 0) _sorters.RemoveAt(index);
         }
 
         public void ClearSorters()
         {
-            throw new System.NotImplementedException();
+            _sorters.Clear();
         }
     }
 }
