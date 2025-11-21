@@ -8,12 +8,9 @@ namespace LobbyService.LocalServer
     public class LocalBrowserProvider : IBrowserProvider
     {
         public IBrowserFilterProvider Filter { get; } = new LocalBrowserFilterProvider();
-        public IBrowserSorterProvider Sorter { get; } = new LocalBrowserSorterProvider();
         public async Task<List<LobbyDescriptor>> Browse(CancellationToken token)
         {
             LocalProvider.EnsureInitialized();
-            
-            Filter.ApplyFilters();
             
             var response = await LocalLobby.Browse(token: token);
             
@@ -28,8 +25,6 @@ namespace LobbyService.LocalServer
                 Name = snapshot.LobbyData.GetValueOrDefault(LobbyKeys.NameKey, "unnamed")
             }).ToList();
 
-            Sorter.ApplySorters(result);
-            
             return result;
         }
         public void Dispose() { }
