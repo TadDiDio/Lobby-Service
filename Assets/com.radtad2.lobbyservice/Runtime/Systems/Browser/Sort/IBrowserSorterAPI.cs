@@ -1,9 +1,17 @@
+using System.Collections.Generic;
+
 namespace LobbyService
 {
     public interface IBrowserSorterAPI
     {
         /// <summary>
-        /// Adds a sorter.
+        /// Applies all sorters in the order they were added.
+        /// </summary>
+        /// <param name="descriptors">The list of descriptors to sort.</param>
+        public void ApplySorters(List<LobbyDescriptor> descriptors);
+        
+        /// <summary>
+        /// Adds a sorter for use during ApplySorters..
         /// </summary>
         /// <param name="sorter">The sorter.</param>
         /// <param name="key">The key.</param>

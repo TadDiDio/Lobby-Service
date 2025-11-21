@@ -8,14 +8,11 @@ namespace LobbyService.Example.Steam
     public class SteamBrowserProvider : IBrowserProvider
     {
         public IBrowserFilterProvider Filter { get; } = new SteamBrowserFilterProvider();
-        public IBrowserSorterProvider Sorter { get; } = new SteamBrowserSorterProvider();
         
         public async Task<List<LobbyDescriptor>> Browse(CancellationToken token)
         {
             if (!SteamProvider.EnsureInitialized()) return new List<LobbyDescriptor>();
             
-            Filter.ApplyFilters();
-
             var tcs = new TaskCompletionSource<uint>();
             using var callResult = CallResult<LobbyMatchList_t>.Create();
             var handle = SteamMatchmaking.RequestLobbyList();
@@ -43,8 +40,6 @@ namespace LobbyService.Example.Steam
                     IsJoinable = true
                 });
             }
-
-            Sorter.ApplySorters(result);
 
             return result;
         }

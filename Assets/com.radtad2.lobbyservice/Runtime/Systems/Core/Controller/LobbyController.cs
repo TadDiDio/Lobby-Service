@@ -211,7 +211,7 @@ namespace LobbyService
                 IBrowserSorterAPI sorter = null;
                 if (_provider.Browser.Filter != null)
                 {
-                    sorter = new BrowserSorterModule(_viewModule, _provider.Browser.Sorter);
+                    sorter = new BrowserSorterModule(_viewModule);
                     _capabilities.SupportsBrowserSorter = true;
                 }
                 else filter = new NullBrowserFilterModule();

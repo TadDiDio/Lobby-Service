@@ -12,7 +12,12 @@ namespace LobbyService
             _viewBus = viewBus;
             _filter = filter;
         }
-        
+
+        public void ApplyFilters()
+        {
+            _filter.ApplyFilters();
+        }
+
         public void AddNumberFilter(LobbyNumberFilter filter)
         {
             _filter.AddNumberFilter(filter);

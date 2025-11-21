@@ -11,11 +11,6 @@ namespace LobbyService
         /// A module providing filtering capabilities.
         /// </summary>
         public IBrowserFilterProvider Filter { get; }
-
-        /// <summary>
-        /// A module providing sorting capabilities.
-        /// </summary>
-        public IBrowserSorterProvider Sorter { get; }
         
         /// <summary>
         /// Searches for lobbies matching the current filters set.

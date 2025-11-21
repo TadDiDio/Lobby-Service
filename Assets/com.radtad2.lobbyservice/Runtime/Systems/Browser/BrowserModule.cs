@@ -34,7 +34,11 @@ namespace LobbyService
             try
             {
                 _viewBus.DisplayStartedBrowsing();
+                
+                Filter.ApplyFilters();
                 var result = await _browser.Browse(_tokenSource.Token);
+                Sorter.ApplySorters(result);
+                
                 _viewBus.DisplayBrowsingResult(result);
             }
             catch (OperationCanceledException)

@@ -5,6 +5,7 @@ namespace LobbyService
     /// </summary>
     public class NullBrowserFilterModule : IBrowserFilterAPI
     {
+        public void ApplyFilters() { }
         public void AddNumberFilter(LobbyNumberFilter filter) { }
         public void AddStringFilter(LobbyStringFilter filter) { }
         public void RemoveNumberFilter(string key) { }

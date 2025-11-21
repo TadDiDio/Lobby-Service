@@ -3,15 +3,22 @@ namespace LobbyService
     public interface IBrowserFilterAPI
     {
         /// <summary>
-        /// Adds a number filter. Only lobbies matching this key-value pair will be returned.
+        /// Applies all cached filters.
+        /// </summary>
+        public void ApplyFilters();
+        
+        /// <summary>
+        /// Stores a number filter for use during ApplyFilters. Only lobbies matching this key-value pair will be returned.
         /// </summary>
         /// <param name="filter">The filter.</param>
+        /// <remarks>It is expected that filters added by this are applied during every ApplyFilters until removed.</remarks>
         public void AddNumberFilter(LobbyNumberFilter filter);
 
         /// <summary>
-        /// Adds a string filter. Only lobbies matching this key-value pair will be returned.
+        /// Adds a string filter for use during ApplyFilters. Only lobbies matching this key-value pair will be returned.
         /// </summary>
         /// <param name="filter">The filter.</param>
+        /// <remarks>It is expected that filters added by this are applied during every ApplyFilters until removed.</remarks>
         public void AddStringFilter(LobbyStringFilter filter);
 
         /// <summary>
@@ -27,9 +34,10 @@ namespace LobbyService
         public void RemoveStringFilter(string key);
         
         /// <summary>
-        /// Sets a number of slots that need to be available.
+        /// Sets a number of slots that need to be available for use during ApplyFilters.
         /// </summary>
         /// <param name="slots">The number of slots.</param>
+        /// <remarks>It is expected that filters added by this are applied during every ApplyFilters until removed.</remarks>
         public void AddSlotsAvailableFilter(int slots);
 
         /// <summary>
@@ -38,9 +46,10 @@ namespace LobbyService
         public void ClearSlotsAvailableFilter();
 
         /// <summary>
-        /// Sets a response limiter.
+        /// Sets a response limiter for use during ApplyFilters.
         /// </summary>
         /// <param name="limit">The maximum number of responses to return.</param>
+        /// <remarks>It is expected that filters added by this are applied during every ApplyFilters until removed.</remarks>
         public void SetLimitResponsesFilter(int limit);
 
         /// <summary>
@@ -49,9 +58,10 @@ namespace LobbyService
         public void ClearLimitResponsesFilter();
 
         /// <summary>
-        /// Sets a distance filter. Only lobbies within this distance value will be returned.
+        /// Sets a distance filter for use during ApplyFilters. Only lobbies within this distance value will be returned.
         /// </summary>
         /// <param name="filter">The max distance to allow.</param>
+        /// <remarks>It is expected that filters added by this are applied during every ApplyFilters until removed.</remarks>
         public void AddDistanceFilter(LobbyDistance filter);
 
         /// <summary>

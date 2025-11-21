@@ -1,12 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
-using LobbyService.Example.Steam;
 using LobbyService.LocalServer;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Slider = UnityEngine.UI.Slider;
 
@@ -488,11 +484,6 @@ namespace LobbyService.Example
             {
                 _queueScrollDown = false;                
                 chatView.verticalNormalizedPosition = 0;
-            }
-
-            if (Keyboard.current.eKey.wasPressedThisFrame)
-            {
-                Lobby.Browser.Sorter.AddSorter(new CurrentMemberCountSteamSorter(), "test");
             }
         }
     }
