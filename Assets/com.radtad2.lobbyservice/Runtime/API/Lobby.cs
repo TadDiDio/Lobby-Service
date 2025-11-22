@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace LobbyService
@@ -8,22 +9,22 @@ namespace LobbyService
         /// <summary>
         /// Holds actions for lobby browsing.
         /// </summary>
-        public static IBrowserAPI Browser { get; }
+        [UsedImplicitly] public static IBrowserAPI Browser { get; }
         
         /// <summary>
         /// Holds actions for managing lobby friends.
         /// </summary>
-        public static IFriendAPI Friends { get; }
+        [UsedImplicitly] public static IFriendAPI Friends { get; }
         
         /// <summary>
         /// Holds actions for lobby chat.
         /// </summary>
-        public static IChatAPI Chat { get; }
+        [UsedImplicitly] public static IChatAPI Chat { get; }
         
         /// <summary>
         /// Holds actions for lobby procedures.
         /// </summary>
-        public static IProcedureAPI Procedure { get; }
+        [UsedImplicitly] public static IProcedureAPI Procedure { get; }
         
         /// <summary>
         /// Whether the lobby is allowing actions to be run or queued.
@@ -88,6 +89,10 @@ namespace LobbyService
             _preInitWrapper.SetStrategy(strategy);
         }
 
+        /// <summary>
+        /// Sets the rules for the lobby to follow.
+        /// </summary>
+        /// <param name="rules">The rules.</param>
         public static void SetRules(LobbyRules rules)
         {
             if (rules != null) _rules = rules;
@@ -109,6 +114,13 @@ namespace LobbyService
                 ((ModuleProxy<IChatAPI>)Chat).AttachTarget(_controller.Chat);
                 ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
                 // ReSharper restore SuspiciousTypeConversion.Global
+
+                _controller.OnEnteredLobby      += () => OnEnteredLobby?.Invoke();
+                _controller.OnLeftLobby         += i => OnLeftLobby?.Invoke(i);
+                _controller.OnOtherMemberJoined += m => OnOtherMemberJoined?.Invoke(m);
+                _controller.OnOtherMemberLeft   += m => OnOtherMemberLeft?.Invoke(m);
+                _controller.OnOwnershipGained   += () => OnOwnershipGained?.Invoke();
+                _controller.OnOwnershipLost     += () => OnOwnershipLost?.Invoke();
                 
                 if (_rules.AutoStartFriendPolling) Friends.StartPolling(_rules.FriendDiscoveryFilter, _rules.FriendPollingRateSeconds);
             
@@ -132,6 +144,36 @@ namespace LobbyService
             }
             else call();
         }
+        
+        /// <summary>
+        /// Invoked when the local member enters a lobby whether by joining or creating.
+        /// </summary>
+        public static event Action OnEnteredLobby;
+
+        /// <summary>
+        /// Invoked when the local member leaves a lobby whether voluntary or kicked.
+        /// </summary>
+        public static event Action<LeaveInfo> OnLeftLobby;
+
+        /// <summary>
+        /// Invoked when a member other than yourself enters your lobby.
+        /// </summary>
+        public static event Action<LobbyMember> OnOtherMemberJoined;
+
+        /// <summary>
+        /// Invoked when a member other than yourself leaves your lobby.
+        /// </summary>
+        public static event Action<LobbyMember> OnOtherMemberLeft;
+
+        /// <summary>
+        /// Invoked when you gain ownership of a lobby.
+        /// </summary>
+        public static event Action OnOwnershipGained;
+        
+        /// <summary>
+        /// Invoked when you lose ownership of a lobby.
+        /// </summary>
+        public static event Action OnOwnershipLost;
         
         /// <summary>
         /// Tries to create a lobby.

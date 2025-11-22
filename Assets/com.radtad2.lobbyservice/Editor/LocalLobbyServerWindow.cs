@@ -436,13 +436,13 @@ namespace LobbyService.LocalServer.Editor
                         string name = "LocalLobbyServer";
                         _isServerRunning = Process.GetProcessesByName(name).Length > 0;
                     }
+
+                    await Task.Delay(1500, token);  
                 }
                 catch
                 {
                     _isServerRunning = false;
                 }
-
-                await Task.Delay(1500, token);  
             }
         }
 

@@ -31,6 +31,16 @@ namespace LobbyService
         /// Invoked when a member other than yourself leaves your lobby.
         /// </summary>
         public event Action<LobbyMember> OnOtherMemberLeft;
+
+        /// <summary>
+        /// Invoked when you gain ownership of a lobby.
+        /// </summary>
+        public event Action OnOwnershipGained;
+        
+        /// <summary>
+        /// Invoked when you lose ownership of a lobby.
+        /// </summary>
+        public event Action OnOwnershipLost;
         
         /// <summary>
         /// The friends capabilities
@@ -135,6 +145,13 @@ namespace LobbyService
 
             _model = null;
             _capabilities = null;
+
+            OnEnteredLobby = null;
+            OnLeftLobby = null;
+            OnOtherMemberJoined = null;
+            OnOtherMemberLeft = null;
+            OnOwnershipGained = null;
+            OnOwnershipLost = null;
         }
         
         private void Initialize(BaseProvider provider)
@@ -582,10 +599,17 @@ namespace LobbyService
             _model.Owner = newOwner;
 
             var becameOwner = IsOwner && !wasOwner;
-
+            var lostOwner   = !IsOwner && wasOwner;
+            
             _heartbeat.ClearSubscriptions();
 
-            if (becameOwner) SubToAllHeartbeats();
+            if (lostOwner) OnOwnershipLost?.Invoke();
+            
+            if (becameOwner)
+            {
+                SubToAllHeartbeats();
+                OnOwnershipGained?.Invoke();
+            }
             else _heartbeat.SubscribeToHeartbeat(newOwner);
 
             _viewModule.DisplayUpdateOwner(newOwner);
