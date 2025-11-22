@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
-
+    
 namespace LobbyService.LocalServer
 {
     /// <summary>

@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Debug = UnityEngine.Debug;
 
@@ -15,11 +16,11 @@ namespace LobbyService.LocalServer.Editor
         private const string GitHubRepoName  = "LocalLobbyServer";
         private const string DownloadFolder  = "LocalLobbyServerBin";
 
-        private static Process _serverProcess;
         private static string _binaryPath;
+        private static Process _serverProcess;
 
-        private bool _showLogWindow;
-        private bool _autoStart;
+        private bool _isServerRunning;
+        private CancellationTokenSource _pollingCts;
 
         [MenuItem("Tools/Local Lobby Server")]
         public static void ShowWindow()
@@ -27,61 +28,139 @@ namespace LobbyService.LocalServer.Editor
             GetWindow<LocalLobbyServerWindow>("Local Lobby Server");
         }
 
+        private string GetCleanDownloadFolder()
+        {
+            string downloadFolder = GetDownloadFolder();
+            string resolvedFolder = Path.IsPathRooted(downloadFolder) ? downloadFolder
+                : Path.Combine(Application.dataPath, "..", downloadFolder);
+
+            return Path.GetFullPath(resolvedFolder);
+        }
+        
         private void OnEnable()
         {
-            EditorApplication.update += CheckAutoStart;
+            StartServerPolling();
         }
 
         private void OnDisable()
         {
-            EditorApplication.update -= CheckAutoStart;
+            StopServerPolling();
         }
-
+        
         private void OnGUI()
         {
-            // Resolve correct binary path for this platform
-            string platformKey = ServerPlatform.GetPlatformKey();
-            string expectedName = ServerPlatform.GetBinaryFileName();
-            _binaryPath = Path.Combine(Application.dataPath, "..", DownloadFolder, expectedName);
+            string expectedBinaryName = ServerPlatform.GetBinaryFileName();
+            string resolvedFolder = GetCleanDownloadFolder();
+            
+            if (!Directory.Exists(resolvedFolder)) Directory.CreateDirectory(resolvedFolder);
+
+            _binaryPath = Path.Combine(resolvedFolder, expectedBinaryName);
 
             GUILayout.Label("Local Lobby Server Manager", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            _autoStart = EditorGUILayout.Toggle("Auto Start", _autoStart);
-            _showLogWindow = EditorGUILayout.Toggle("Show Log Window", _showLogWindow);
+            EditorGUILayout.LabelField("Download Folder", EditorStyles.boldLabel);
 
+            EditorGUILayout.BeginHorizontal();
+            string newFolder = EditorGUILayout.TextField(resolvedFolder);
+
+            if (GUILayout.Button("Browse", GUILayout.Width(80)))
+            {
+                string picked = EditorUtility.OpenFolderPanel("Select Download Folder", resolvedFolder, "");
+                if (!string.IsNullOrEmpty(picked))
+                {
+                    newFolder = picked;
+                }
+            }
+            
+            if (GUILayout.Button("Reset", GUILayout.Width(60)))
+            {
+                newFolder = DownloadFolder;
+            }
+            
+            EditorGUILayout.EndHorizontal();
+            
+            if (newFolder != resolvedFolder)
+            {
+                SetDownloadFolder(newFolder);
+                resolvedFolder = GetCleanDownloadFolder();
+                
+                if (!Directory.Exists(resolvedFolder)) 
+                    Directory.CreateDirectory(resolvedFolder);
+            
+                _binaryPath = Path.Combine(resolvedFolder, expectedBinaryName);
+                Debug.Log(_binaryPath);
+            }
+            
             EditorGUILayout.Space();
 
-            // Download button
             if (GUILayout.Button("Pull Binary From GitHub Releases"))
             {
-                DownloadServerBinary();
+                DownloadServerBinaryAsync(resolvedFolder);
             }
-
-            // -------------------------------
-            // STATUS: Is the correct binary downloaded?
-            // -------------------------------
+            
             bool binaryExists = File.Exists(_binaryPath);
-
+            
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Platform:", platformKey.ToUpper());
-
+            EditorGUILayout.LabelField("Platform:", ServerPlatform.GetPlatformKey().ToUpper());
+            
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Binary Status:", GUILayout.Width(100));
-
-                GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel);
-                statusStyle.normal.textColor = binaryExists ? Color.green : Color.red;
-
+            
+                GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel)
+                {
+                    normal = { textColor = binaryExists ? Color.green : Color.red }
+                };
+            
                 EditorGUILayout.LabelField(binaryExists ? "Downloaded" : "Not Downloaded", statusStyle);
             }
-
-            // -------------------------------
-            // CONTROL BUTTONS
-            // -------------------------------
+            
+            if (binaryExists)
+            {
+                EditorGUILayout.BeginHorizontal();
+            
+                if (GUILayout.Button("Reveal", GUILayout.Width(100)))
+                {
+                    RevealInFileBrowser(_binaryPath);
+                }
+            
+                if (GUILayout.Button("Delete Binary", GUILayout.Width(120)))
+                {
+                    if (EditorUtility.DisplayDialog("Delete Local Server Binary?",
+                            $"Are you sure you want to delete:\n\n{_binaryPath}",
+                            "Delete", "Cancel"))
+                    {
+                        try
+                        {
+                            File.Delete(_binaryPath);
+                            AssetDatabase.Refresh(); // just in case
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogException(ex);
+                        }
+                    }
+                }
+            
+                EditorGUILayout.EndHorizontal();
+            }
 
             GUI.enabled = binaryExists;
 
+            EditorGUILayout.Space();
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Server Status:", GUILayout.Width(100));
+                
+                GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel)
+                {
+                    normal = { textColor = IsServerRunning() ? Color.green : Color.red }
+                };
+                
+                EditorGUILayout.LabelField(IsServerRunning() ? "Running" : "Not Running", statusStyle);
+            }
+            
             if (GUILayout.Button("Start Server"))
             {
                 StartServer();
@@ -95,12 +174,39 @@ namespace LobbyService.LocalServer.Editor
             }
 
             GUI.enabled = true;
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Binary Location:");
-            EditorGUILayout.LabelField(_binaryPath);
         }
 
+        private void RevealInFileBrowser(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Debug.LogError("Cannot reveal file. It does not exist.");
+                return;
+            }
+
+#if UNITY_EDITOR_WIN
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
+#elif UNITY_EDITOR_OSX
+            Process.Start("open", $"-R \"{path}\"");
+#else
+            Process.Start("xdg-open", Path.GetDirectoryName(path));
+#endif
+        }
+
+        #region Download
+        
+        private const string DownloadFolderPrefKey = "LocalLobbyServer.DownloadFolder";
+
+        private string GetDownloadFolder()
+        {
+            return EditorPrefs.GetString(DownloadFolderPrefKey, "LocalLobbyServer");
+        }
+
+        private void SetDownloadFolder(string folder)
+        {
+            EditorPrefs.SetString(DownloadFolderPrefKey, folder);
+        }
+        
         private static class ServerPlatform
         {
             public static string GetPlatformKey()
@@ -127,6 +233,33 @@ namespace LobbyService.LocalServer.Editor
                 }
             }
         }
+        
+        [Serializable]
+        private class GitHubRelease
+        {
+            public GitHubAsset[] assets;
+        }
+
+        [Serializable]
+        private class GitHubAsset
+        {
+            public long id;
+            public string name;
+        }
+        
+        private long ExtractAssetId(string json, string expectedName)
+        {
+            var release = JsonUtility.FromJson<GitHubRelease>(json);
+            if (release?.assets == null)
+                return 0;
+
+            foreach (var asset in release.assets)
+                if (asset.name == expectedName)
+                    return asset.id;
+
+            return 0;
+        }
+        
         private string GetAssetDownloadUrlForPlatform(string releaseJson, string expectedFileName)
         {
             const string key = "\"browser_download_url\":";
@@ -143,7 +276,8 @@ namespace LobbyService.LocalServer.Editor
 
             return null;
         }
-        private async void DownloadServerBinary()
+        
+        private async void DownloadServerBinaryAsync(string downloadFolder)
         {
             try
             {
@@ -151,35 +285,48 @@ namespace LobbyService.LocalServer.Editor
 
                 EditorUtility.DisplayProgressBar("Downloading", "Fetching latest GitHub release...", 0.2f);
 
-                using var client = new HttpClient();
+                using var metaClient = new HttpClient();
+                metaClient.DefaultRequestHeaders.Add("User-Agent", "UnityEditor");
 
-                // GitHub API endpoint
-                var releaseUrl = $"https://api.github.com/repos/{GitHubRepoOwner}/{GitHubRepoName}/releases/latest";
-                client.DefaultRequestHeaders.Add("User-Agent", "UnityEditor");
+                string releaseUrl = $"https://api.github.com/repos/{GitHubRepoOwner}/{GitHubRepoName}/releases/latest";
+                string json = await metaClient.GetStringAsync(releaseUrl);
 
-                // Fetch JSON
-                string json = await client.GetStringAsync(releaseUrl);
+                string platformKey  = ServerPlatform.GetPlatformKey();
+                string expectedName = ServerPlatform.GetBinaryFileName();
 
-                // Determine correct platform + filename
-                string platformKey = ServerPlatform.GetPlatformKey();     // "win" | "mac" | "linux"
-                string expectedName = ServerPlatform.GetBinaryFileName(); // e.g. LocalLobbyServer-win.exe
-
-                // Extract the proper asset URL
-                string assetUrl = GetAssetDownloadUrlForPlatform(json, expectedName);
-                if (assetUrl == null)
+                string assetBrowserUrl = GetAssetDownloadUrlForPlatform(json, expectedName);
+                if (assetBrowserUrl == null)
                 {
                     EditorUtility.ClearProgressBar();
                     Debug.LogError($"Asset `{expectedName}` not found in GitHub release.");
                     return;
                 }
 
-                string localPath = Path.Combine(Application.dataPath, "..", DownloadFolder, expectedName);
+                long assetId = ExtractAssetId(json, expectedName);
+                if (assetId == 0)
+                {
+                    EditorUtility.ClearProgressBar();
+                    Debug.LogError($"Failed to resolve asset ID for `{expectedName}`.");
+                    return;
+                }
 
-                EditorUtility.DisplayProgressBar("Downloading", $"Downloading server binary for {platformKey}...", 0.5f);
+                string assetApiUrl = $"https://api.github.com/repos/{GitHubRepoOwner}/{GitHubRepoName}/releases/assets/{assetId}";
 
-                // Download binary
-                var bytes = await client.GetByteArrayAsync(assetUrl);
-                File.WriteAllBytes(localPath, bytes);
+                string localPath = Path.Combine(downloadFolder, expectedName);
+                EditorUtility.DisplayProgressBar(
+                    "Downloading",
+                    $"Downloading server binary for {platformKey}...",
+                    0.5f
+                );
+
+                using (var downloadClient = new HttpClient())
+                {
+                    downloadClient.DefaultRequestHeaders.Add("User-Agent", "UnityEditor");
+                    downloadClient.DefaultRequestHeaders.Add("Accept", "application/octet-stream");
+
+                    byte[] bytes = await downloadClient.GetByteArrayAsync(assetApiUrl);
+                    await File.WriteAllBytesAsync(localPath, bytes);
+                }
 
                 EditorUtility.ClearProgressBar();
                 Debug.Log($"Downloaded server binary for {platformKey} to: {localPath}");
@@ -191,7 +338,9 @@ namespace LobbyService.LocalServer.Editor
             }
         }
 
+        #endregion
 
+        #region Server
         private void StartServer()
         {
             if (!File.Exists(_binaryPath))
@@ -211,29 +360,15 @@ namespace LobbyService.LocalServer.Editor
                 var psi = new ProcessStartInfo
                 {
                     FileName = _binaryPath,
-                    WorkingDirectory = Path.GetDirectoryName(_binaryPath),
-                    CreateNoWindow = !_showLogWindow,
-                    UseShellExecute = !_showLogWindow,
-                    RedirectStandardOutput = _showLogWindow,
-                    RedirectStandardError  = _showLogWindow
+                    WorkingDirectory = Path.GetDirectoryName(_binaryPath) ?? ".",
+                    CreateNoWindow = true,
+                    UseShellExecute = true,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError  = false
                 };
 
                 _serverProcess = Process.Start(psi);
-
-                if (_showLogWindow)
-                {
-                    Task.Run(async () =>
-                    {
-                        while (!_serverProcess.HasExited)
-                        {
-                            string line = await _serverProcess.StandardOutput.ReadLineAsync();
-                            if (line != null)
-                            {
-                                Repaint();
-                            }
-                        }
-                    });
-                }
+                _isServerRunning = true;
 
                 Debug.Log("Local server started.");
             }
@@ -255,6 +390,7 @@ namespace LobbyService.LocalServer.Editor
 
                 _serverProcess.Kill();
                 _serverProcess = null;
+                _isServerRunning = false;
                 Debug.Log("Server stopped.");
             }
             catch (Exception ex)
@@ -263,24 +399,54 @@ namespace LobbyService.LocalServer.Editor
             }
         }
 
-        private bool IsServerRunning()
+        private void StartServerPolling()
         {
-            if (_serverProcess != null && !_serverProcess.HasExited)
-                return true;
+            if (_pollingCts != null) return;
 
-            // Fallback: check by process name
-            string name = Path.GetFileNameWithoutExtension("LocalLobbyServer");
-            return Process.GetProcessesByName(name).Length > 0;
+            _pollingCts = new CancellationTokenSource();
+            PollServerLoop(_pollingCts.Token);
         }
 
-        private void CheckAutoStart()
+        private void StopServerPolling()
         {
-            if (!_autoStart) return;
-
-            if (!IsServerRunning() && File.Exists(_binaryPath))
+            try
             {
-                StartServer();
+                _pollingCts?.Cancel();
+                _pollingCts = null;
+            }
+            catch
+            {
+                // ignored
             }
         }
+        
+        
+        private async void PollServerLoop(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    if (_serverProcess is { HasExited: false })
+                    {
+                        _isServerRunning = true;
+                    }
+                    else
+                    {
+                        string name = "LocalLobbyServer";
+                        _isServerRunning = Process.GetProcessesByName(name).Length > 0;
+                    }
+                }
+                catch
+                {
+                    _isServerRunning = false;
+                }
+
+                await Task.Delay(1500, token);  
+            }
+        }
+
+        private bool IsServerRunning() => _isServerRunning;
+        #endregion
     }
 }
