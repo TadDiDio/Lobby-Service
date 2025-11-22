@@ -99,13 +99,18 @@ namespace LobbyService.Example.Steam
 
                         if (_filter is FriendDiscoveryFilter.All || state is EPersonaState.k_EPersonaStateOnline)
                         {
-                            members.Add(new LobbyMember(new ProviderId(id.ToString()), SteamFriends.GetFriendPersonaName(id)));
+                            members.Add(new LobbyMember(new ProviderId(id.ToString()),
+                                SteamFriends.GetFriendPersonaName(id)));
                         }
                     }
 
                     FriendsUpdated?.Invoke(members);
                     await Task.Delay(TimeSpan.FromSeconds(_interval), token);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignored
             }
             catch (Exception e)
             {

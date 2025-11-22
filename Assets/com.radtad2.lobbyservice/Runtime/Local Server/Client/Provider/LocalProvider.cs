@@ -147,7 +147,7 @@ namespace LobbyService.LocalServer
             });
         }
 
-        public override bool Close(ProviderId lobbyId)
+        public override bool CloseAndLeave(ProviderId lobbyId)
         {
             EnsureInitialized();
             

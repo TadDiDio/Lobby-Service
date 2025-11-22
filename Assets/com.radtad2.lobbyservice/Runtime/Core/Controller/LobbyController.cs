@@ -527,13 +527,20 @@ namespace LobbyService
         /// <summary>
         /// Attempts to close the lobby. Only the owner can do this.
         /// </summary>
-        public void Close()
+        public void CloseAndLeave()
         {
             if (!ValidatePermission(LobbyState.InLobby, true)) return;
             if (!TrySetState(LobbyState.NotInLobby)) return;
-            if (!_provider.Close(_model.LobbyId)) return;
+            if (!_provider.CloseAndLeave(_model.LobbyId)) return;
 
-            Leave();
+            var info = new LeaveInfo
+            {
+                Member = LocalMember,
+                LeaveReason = LeaveReason.UserRequested,
+                KickInfo = null
+            };
+            
+            OnLocalMemberLeftLobby(info);
         }
         #endregion
         

@@ -184,7 +184,7 @@ namespace LobbyService.Example
 
         public void Close()
         {
-            Lobby.Close();
+            Lobby.CloseAndLeave();
         }
         
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)

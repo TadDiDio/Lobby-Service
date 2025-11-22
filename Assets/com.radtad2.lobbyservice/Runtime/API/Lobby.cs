@@ -199,10 +199,10 @@ namespace LobbyService
         public static void Leave() => Dispatch(() => _controller.Leave());
 
         /// <summary>
-        /// Tries to close a lobby.
+        /// Tries to close a lobby and leaves it.
         /// </summary>
         /// <remarks>You must be the current owner to do this.</remarks>
-        public static void Close() => Dispatch(() => _controller.Close());
+        public static void CloseAndLeave() => Dispatch(() => _controller.CloseAndLeave());
         
         /// <summary>
         /// Tries to set a new owner.

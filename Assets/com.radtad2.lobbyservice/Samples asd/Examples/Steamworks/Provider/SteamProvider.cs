@@ -337,7 +337,7 @@ namespace LobbyService.Example.Steam
             SteamMatchmaking.LeaveLobby(id);
         }
 
-        public override bool Close(ProviderId lobbyId)
+        public override bool CloseAndLeave(ProviderId lobbyId)
         {
             if (!EnsureInitialized()) return false;
             if (!ValidSteamId(lobbyId, out var id)) return false;

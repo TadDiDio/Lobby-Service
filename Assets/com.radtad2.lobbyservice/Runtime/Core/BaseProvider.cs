@@ -136,7 +136,7 @@ namespace LobbyService
         /// <param name="lobbyId">The current lobbyId, or null if there is none.</param>
         /// </summary>
         /// <returns>True if successful. Can fail if you are not the owner.</returns>
-        public abstract bool Close(ProviderId lobbyId);
+        public abstract bool CloseAndLeave(ProviderId lobbyId);
 
         /// <summary>
         /// Promotes another member to owner. Only the owner can do this.
