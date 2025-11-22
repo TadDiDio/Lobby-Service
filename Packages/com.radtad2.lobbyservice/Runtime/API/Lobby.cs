@@ -138,7 +138,7 @@ namespace LobbyService
             {
                 if (_rules.WarnOnPreInitCommands)
                 {
-                    Debug.LogWarning($"Received a call before initialization: {Environment.NewLine}{Environment.StackTrace}");
+                    Debug.LogWarning($"Received a call before initialization");
                 }
                 _preInitWrapper.RegisterAction(call);
             }
@@ -252,6 +252,11 @@ namespace LobbyService
         #endregion
         
         #region Read Surface
+        /// <summary>
+        /// The rules currently governing the lobby service.
+        /// </summary>
+        public static LobbyRules Rules => _rules;
+        
         /// <summary>
         /// The local member or a special Unknown member if the system is not initialized.
         /// </summary>

@@ -28,8 +28,15 @@ namespace LobbyService
         protected override object Invoke(MethodInfo targetMethod, object[] args)
         {
             if (_target != null) return targetMethod.Invoke(_target, args);
-            
-            if (Lobby.AllowingActions) _strategyWrapper.RegisterAction(() => targetMethod.Invoke(_target, args));
+
+            if (Lobby.AllowingActions)
+            {
+                if (Lobby.Rules.WarnOnPreInitCommands)
+                {
+                    Debug.LogWarning($"Received a call before initialization");
+                }
+                _strategyWrapper.RegisterAction(() => targetMethod.Invoke(_target, args));
+            }
             return GetDefaultReturnValue(targetMethod.ReturnType);
         }
         
