@@ -11,7 +11,7 @@ namespace LobbyService.Example
         // Change this to see the minimal example.
         private bool usePreferred = true;
         
-        private void Awake()
+        private void Start()
         {
             if (usePreferred) PreferredSetup();
             else MinimalSetup();
