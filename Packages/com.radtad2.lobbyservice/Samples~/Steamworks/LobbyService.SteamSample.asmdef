@@ -1,0 +1,9 @@
+{
+  "name": "LobbyService.SteamSample",
+  "references": [
+    "LobbyService",
+    "com.rlabrecque.steamworks.net",
+    "Unity.TextMeshPro"
+  ],
+  "autoReferenced": false
+}

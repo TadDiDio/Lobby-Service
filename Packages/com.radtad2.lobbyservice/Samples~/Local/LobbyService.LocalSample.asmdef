@@ -1,0 +1,8 @@
+{
+  "name": "LobbyService.LocalSample",
+  "references": [
+    "LobbyService",
+    "Unity.TextMeshPro"
+  ],
+  "autoReferenced": false
+}

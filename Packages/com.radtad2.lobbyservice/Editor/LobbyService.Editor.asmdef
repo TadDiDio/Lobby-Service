@@ -1,0 +1,10 @@
+{
+  "name": "LobbyService.Editor",
+  "references": [
+    "LobbyService"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}
