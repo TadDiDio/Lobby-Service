@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -7,6 +8,8 @@ namespace LobbyService
 {
     public class ModuleProxy<T> : DispatchProxy
     {
+        private readonly Dictionary<string, object> _propertyBag = new();
+        
         private PreInitWrapper _strategyWrapper;
         private T _target;
         
@@ -27,6 +30,12 @@ namespace LobbyService
         
         protected override object Invoke(MethodInfo targetMethod, object[] args)
         {
+            // Allow getters and setters to pass through 
+            if (targetMethod.IsSpecialName)
+            {
+                return HandleProperty(targetMethod, args);
+            }
+            
             if (_target != null) return targetMethod.Invoke(_target, args);
 
             if (Lobby.AllowingActions)
@@ -38,6 +47,29 @@ namespace LobbyService
                 _strategyWrapper.RegisterAction(() => targetMethod.Invoke(_target, args));
             }
             return GetDefaultReturnValue(targetMethod.ReturnType);
+        }
+        
+        private object HandleProperty(MethodInfo method, object[] args)
+        {
+            string name = method.Name;
+
+            if (name.StartsWith("set_"))
+            {
+                var prop = name.Substring(4);
+                _propertyBag[prop] = args[0];
+                return null;
+            }
+
+            if (name.StartsWith("get_"))
+            {
+                var prop = name.Substring(4);
+
+                return _propertyBag.TryGetValue(prop, out var value)
+                    ? value
+                    : GetDefaultReturnValue(method.ReturnType);
+            }
+
+            return null;
         }
         
         private object GetDefaultReturnValue(Type returnType)

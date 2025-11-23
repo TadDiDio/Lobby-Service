@@ -44,7 +44,7 @@ namespace LobbyService
             browserProxy.Filter = ModuleProxyFactory.Create<IBrowserFilterAPI>(_preInitWrapper);
             browserProxy.Sorter = ModuleProxyFactory.Create<IBrowserSorterAPI>(_preInitWrapper);
             Browser = browserProxy;
-            
+
             Friends = ModuleProxyFactory.Create<IFriendAPI>(_preInitWrapper);
             Chat =  ModuleProxyFactory.Create<IChatAPI>(_preInitWrapper);
             Procedure = ModuleProxyFactory.Create<IProcedureAPI>(_preInitWrapper);
@@ -110,6 +110,9 @@ namespace LobbyService
                 
                 // ReSharper disable SuspiciousTypeConversion.Global
                 ((ModuleProxy<IBrowserAPIInternal>)Browser)?.AttachTarget(_controller.Browser);
+                ((ModuleProxy<IBrowserFilterAPI>)Browser?.Filter)?.AttachTarget(_controller.Browser.Filter);
+                ((ModuleProxy<IBrowserSorterAPI>)Browser?.Sorter)?.AttachTarget(_controller.Browser.Sorter);
+                
                 ((ModuleProxy<IFriendAPI>)Friends).AttachTarget(_controller.Friends);
                 ((ModuleProxy<IChatAPI>)Chat).AttachTarget(_controller.Chat);
                 ((ModuleProxy<IProcedureAPI>)Procedure).AttachTarget(_controller.Procedures);
@@ -138,7 +141,7 @@ namespace LobbyService
             {
                 if (_rules.WarnOnPreInitCommands)
                 {
-                    Debug.LogWarning($"Received a call before initialization");
+                    Debug.LogWarning("Received a call before initialization");
                 }
                 _preInitWrapper.RegisterAction(call);
             }

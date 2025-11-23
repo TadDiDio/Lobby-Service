@@ -479,7 +479,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7812387300604091827}
-  - component: {fileID: 3186602890180073019}
+  - component: {fileID: 1157349034827726013}
   m_Layer: 5
   m_Name: Lobby Card
   m_TagString: Untagged
@@ -510,7 +510,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &3186602890180073019
+--- !u!114 &1157349034827726013
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -519,7 +519,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8564714913828958134}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 655eb1ba2e254d22a7aea99f284b4127, type: 3}
+  m_Script: {fileID: 11500000, guid: f037b8336dc9d374ca3bdfb58c21c652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyService.Example.LobbyCard
   joinButton: {fileID: 4701447159870197778}

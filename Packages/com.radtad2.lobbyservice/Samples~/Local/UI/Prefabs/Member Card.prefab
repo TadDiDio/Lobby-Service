@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5828264494844172321}
-  - component: {fileID: 7987970821845736420}
+  - component: {fileID: 5144943706729475446}
   m_Layer: 5
   m_Name: Member Card
   m_TagString: Untagged
@@ -42,7 +42,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7987970821845736420
+--- !u!114 &5144943706729475446
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -51,9 +51,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 826021452921776243}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4599478ae76499f9fc09766db69bf89, type: 3}
+  m_Script: {fileID: 11500000, guid: a7623fad3ecb39b4eb4c0a80859872f1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LobbyService.LocalServer.MemberCard
+  m_EditorClassIdentifier: Assembly-CSharp::LobbyService.Example.MemberCard
   memberName: {fileID: 3042736277869989505}
   avatarImage: {fileID: 2475390668023559532}
   kickButton: {fileID: 5699256413655222720}
