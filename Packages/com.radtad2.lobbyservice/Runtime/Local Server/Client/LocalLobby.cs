@@ -15,7 +15,9 @@ namespace LobbyService.LocalServer
     {
         public static bool Initialized { get; private set; }
         private static Task<bool> _initTask;
-        
+
+        public const string PortKey = "LobbyService.LocalServer.Port";
+
         private static LocalLobbyClient _client;
         private static LobbyMember _localUser;
         private static Dictionary<string, LobbySnapshot> _cachedLobbies;
@@ -47,10 +49,7 @@ namespace LobbyService.LocalServer
                 ConsoleRedirector.Redirect();
                 
                 _cachedLobbies = new Dictionary<string, LobbySnapshot>();
-                
-                Launcher.EnsureServerExists();
-
-                _client = new LocalLobbyClient(IPAddress.Loopback, ServerDetails.Port);
+                _client = new LocalLobbyClient(IPAddress.Loopback, LobbyConfig.Port);
                 if (!await _client.ConnectAsync(token)) return false;
 
                 var welcome = await GetResponseAsync<WelcomeResponse>(new ConnectRequest(), 3f, token);

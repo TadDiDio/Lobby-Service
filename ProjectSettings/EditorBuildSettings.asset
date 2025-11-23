@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/com.radtad2.lobbyservice/Samples/Examples/Local/Scene/LocalLobbySample.unity
-    guid: de4e02c013ea8094e99e807a26625f3d
+    path: Assets/Samples/Lobby Service/1.0.0/Local Server example/Scene/LocalLobbySample.unity
+    guid: 9bfb6cd009c95a0409f7698f159d8eba
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

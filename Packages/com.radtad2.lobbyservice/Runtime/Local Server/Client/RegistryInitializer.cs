@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyService.LocalServer.Client
+namespace LobbyService.LocalServer
 {
     public static class RegistryInitializer
     {

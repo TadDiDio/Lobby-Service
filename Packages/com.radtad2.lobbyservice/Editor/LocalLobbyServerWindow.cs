@@ -18,7 +18,7 @@ namespace LobbyService.LocalServer.Editor
 
         private static string _binaryPath;
         private static Process _serverProcess;
-
+        
         private bool _isServerRunning;
         private CancellationTokenSource _pollingCts;
 
@@ -85,11 +85,9 @@ namespace LobbyService.LocalServer.Editor
                 SetDownloadFolder(newFolder);
                 resolvedFolder = GetCleanDownloadFolder();
                 
-                if (!Directory.Exists(resolvedFolder)) 
-                    Directory.CreateDirectory(resolvedFolder);
+                if (!Directory.Exists(resolvedFolder)) Directory.CreateDirectory(resolvedFolder);
             
                 _binaryPath = Path.Combine(resolvedFolder, expectedBinaryName);
-                Debug.Log(_binaryPath);
             }
             
             EditorGUILayout.Space();
@@ -146,7 +144,7 @@ namespace LobbyService.LocalServer.Editor
                 EditorGUILayout.EndHorizontal();
             }
 
-            GUI.enabled = binaryExists;
+            GUI.enabled = binaryExists && !IsServerRunning();
 
             EditorGUILayout.Space();
             using (new EditorGUILayout.HorizontalScope())
@@ -161,12 +159,28 @@ namespace LobbyService.LocalServer.Editor
                 EditorGUILayout.LabelField(IsServerRunning() ? "Running" : "Not Running", statusStyle);
             }
             
+            EditorGUI.BeginChangeCheck();
+
+            string portStr = EditorGUILayout.TextField("Port", LobbyConfig.Port.ToString());
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (int.TryParse(portStr, out int newPort) && newPort is > 0 and <= 65535)
+                {
+                    LobbyConfig.Port = newPort;
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("Invalid port (1–65535).", MessageType.Warning);
+                }
+            }
+            
             if (GUILayout.Button("Start Server"))
             {
                 StartServer();
             }
 
-            GUI.enabled = _serverProcess != null && !_serverProcess.HasExited;
+            GUI.enabled = IsServerRunning();
 
             if (GUILayout.Button("Stop Server"))
             {
@@ -360,11 +374,10 @@ namespace LobbyService.LocalServer.Editor
                 var psi = new ProcessStartInfo
                 {
                     FileName = _binaryPath,
+                    Arguments = $"{LobbyConfig.Port}",
                     WorkingDirectory = Path.GetDirectoryName(_binaryPath) ?? ".",
-                    CreateNoWindow = true,
                     UseShellExecute = true,
-                    RedirectStandardOutput = false,
-                    RedirectStandardError  = false
+                    CreateNoWindow = false
                 };
 
                 _serverProcess = Process.Start(psi);
@@ -433,8 +446,13 @@ namespace LobbyService.LocalServer.Editor
                     }
                     else
                     {
-                        string name = "LocalLobbyServer";
-                        _isServerRunning = Process.GetProcessesByName(name).Length > 0;
+                        var processes = Process.GetProcessesByName(ServerPlatform.GetBinaryFileName().Split(".")[0]);
+                        
+                        _isServerRunning = processes.Length > 0;
+                        if (_isServerRunning)
+                        {
+                            _serverProcess = processes[0];
+                        }
                     }
 
                     await Task.Delay(1500, token);  
