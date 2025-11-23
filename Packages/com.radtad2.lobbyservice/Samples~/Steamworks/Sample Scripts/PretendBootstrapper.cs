@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace LobbyService.Example
 {
-    public class SteamworksLobbyBootstrapper : MonoBehaviour
+    public class SteamworksLobbyBootstrapper
     {
-        private void Start()
+        public void Setup()
         {
             // We pass in the list of keys we are using so steam knows what data to pull during updates.
             // Modify SteamLobbyKeys.LobbyKeys and .MemberKeys to include any additional keys you care about.
