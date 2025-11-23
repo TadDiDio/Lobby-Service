@@ -8,7 +8,7 @@ using Slider = UnityEngine.UI.Slider;
 
 namespace LobbyService.Example
 {
-    public class SampleView : MonoBehaviour, ICoreView, IFriendView, IBrowserView, IChatView
+    public class LocalSampleView : MonoBehaviour, ICoreView, IFriendView, IBrowserView, IChatView
     {
         public TMP_Text lobbyNameText;
         public TMP_Text localUserText;

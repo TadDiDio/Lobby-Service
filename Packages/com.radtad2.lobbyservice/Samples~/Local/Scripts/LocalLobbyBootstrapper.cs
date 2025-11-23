@@ -7,7 +7,7 @@ namespace LobbyService.LocalServer.Example
 {
     public class LocalLobbyBootstrapper : MonoBehaviour
     {
-        [SerializeField] private SampleView view;
+        [SerializeField] private LocalSampleView view;
         [SerializeField] private LobbyRules rules;
         
         private void Start()

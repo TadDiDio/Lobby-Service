@@ -5,7 +5,7 @@ namespace LobbyService.Example
 {
     public class SteamworksLobbyBootstrapper : MonoBehaviour
     {
-        [SerializeField] private SampleView view;
+        [SerializeField] private SteamSampleView view;
         [SerializeField] private LobbyRules rules;
         
         // Change this to see the minimal example.
