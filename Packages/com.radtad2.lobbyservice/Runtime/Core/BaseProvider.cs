@@ -95,7 +95,7 @@ namespace LobbyService
         /// <summary>
         /// Initializes the lobby provider.
         /// </summary>
-        public abstract void Initialize(LobbyController controller);
+        public abstract void Initialize();
 
         /// <summary>
         /// Gets the local user whether or not they are in a lobby.

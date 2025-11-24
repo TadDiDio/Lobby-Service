@@ -15,8 +15,8 @@ namespace LobbyService.LocalServer
         public override event Action<LobbyMember> OnOwnerUpdated;
 
         private CancellationTokenSource _lifetimeCts;
-        private LobbyController _controller;
-        public override void Initialize(LobbyController controller)
+
+        public override void Initialize()
         {
             EnsureInitialized();
 
@@ -27,8 +27,6 @@ namespace LobbyService.LocalServer
             LocalLobby.OnLobbyDataUpdated += HandleLobbyDataUpdated;
             LocalLobby.OnMemberDataUpdated += HandleMemberDataUpdated;
             LocalLobby.OnOwnerUpdated += HandleOwnerUpdated;
-            
-            _controller = controller;
             
             _lifetimeCts = new CancellationTokenSource();
         }
@@ -176,7 +174,7 @@ namespace LobbyService.LocalServer
         {
             EnsureInitialized();
 
-            if (!_controller.IsOwner) return false;
+            if (!Lobby.IsOwner) return false;
             
             LocalLobby.KickMember(new KickMemberRequest
             {

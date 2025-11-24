@@ -172,7 +172,7 @@ namespace LobbyService
             
             ConstructCapabilities();
             
-            _provider.Initialize(this);
+            _provider.Initialize();
             _viewModule.ResetView(Capabilities);
             
             if (_provider.ShouldFlushStaleLobbies() && _staleLobbyManager.TryGetStaleId(_provider.GetType(), out var staleId))

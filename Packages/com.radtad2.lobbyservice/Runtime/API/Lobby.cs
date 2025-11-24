@@ -38,7 +38,7 @@ namespace LobbyService
         
         static Lobby()
         {
-            _preInitWrapper = new PreInitWrapper(new ExecutePreInitStrategy());
+            _preInitWrapper = new PreInitWrapper(new DropPreInitStrategy());
             
             var browserProxy = ModuleProxyFactory.Create<IBrowserAPIInternal>(_preInitWrapper);
             browserProxy.Filter = ModuleProxyFactory.Create<IBrowserFilterAPI>(_preInitWrapper);
@@ -74,7 +74,7 @@ namespace LobbyService
             ((ModuleProxy<IProcedureAPI>)Procedure).DetachTarget();
             // ReSharper restore SuspiciousTypeConversion.Global
             
-            _preInitWrapper.Reset(new ExecutePreInitStrategy());
+            _preInitWrapper.Reset(new DropPreInitStrategy());
         }
         
         /// <summary>

@@ -9,9 +9,6 @@ namespace LobbyService.Example.Steam
 {
     public class SteamProvider : BaseProvider
     {
-        // ==== Core ====
-        private LobbyController _controller;
-
         private List<string> _lobbyKeys;
         private List<string> _memberKeys;
 
@@ -21,8 +18,6 @@ namespace LobbyService.Example.Steam
         private Callback<LobbyDataUpdate_t> _lobbyDataUpdated;
         private Callback<LobbyInvite_t> _lobbyInvited;
 
-        // This is a unique string filter to separate our game from the masses in 480
-        private const string GameFilterKey = "pvp_enabled_480_destroyer";
         private const string CloseProcedureKey = "close_lobby";
         private const string KickProcedureKey = "kick_member";
         // ==== End Core ====
@@ -89,11 +84,6 @@ namespace LobbyService.Example.Steam
         public override event Action<LobbyInvite> OnReceivedInvitation;
         public override event Action<KickInfo> OnLocalMemberKicked;
         public override event Action<LobbyMember> OnOwnerUpdated;
-
-        public override void Initialize(LobbyController controller)
-        {
-            _controller = controller;
-        }
 
         public static bool ValidSteamId(ProviderId id, out CSteamID steamId)
         {
@@ -231,9 +221,6 @@ namespace LobbyService.Example.Steam
                 SteamMatchmaking.SetLobbyData(id, SteamLobbyKeys.Name, request.Name);
                 SteamMatchmaking.SetLobbyData(id, SteamLobbyKeys.Type, request.LobbyType.ToString());
 
-                // Temp: only for testing during PvP enabled 480 space.
-                SteamMatchmaking.SetLobbyData(id, GameFilterKey, "_BLACK_VEIL_");
-
                 lobbyId = new ProviderId(id.ToString());
                 tcs.SetResult(true);
             });
@@ -311,7 +298,7 @@ namespace LobbyService.Example.Steam
         {
             if (!EnsureInitialized()) return;
             
-            _controller.Join(new JoinLobbyRequest
+            Lobby.Join(new JoinLobbyRequest
             {
                 LobbyId = new ProviderId(request.m_steamIDLobby.ToString())
             });
