@@ -15,7 +15,8 @@ server so you can test your entire lobby flow with the real game UI all on one m
 ---
 ## Disclaimer
 This system was developed as tech dev for my own projects. Due to time, it has _not_ been thoroughly tested
-and assuming correctness is a dangerous game to play :)
+and assuming correctness is a dangerous game to play :).
+If you run into issues or have suggestions, feel free to open an issue on GitHub... no promises, but I’ll help when I can.
 
 ## Installation
 
