@@ -40,7 +40,18 @@ until `SetProvider` is called.
 3. `Lobby.SetProvider(BaseProvider)` will set the provider and initialize the lobby system.
 4. `Lobby.ConnectView(IView)` will connect a view to the lobby system. 
 
-## Interactions
+## Using the Local Server
+To use the local server, go to Tools -> Local Lobby Server to open the window. Make sure to pull the binary which will be 
+installed to the currently set 'Download Folder'. Afterwards, just press 'Start Server' and it should open a terminal window with the 
+server application running which will log activity as it happens. You can see the Local Server example in Samples for an out of the box working example of how to connect to it
+from client code, its very easy.
+
+You can see the binary src files at the following repo, just note that if you wish to compile it yourself you must copy and paste the files 
+from com.radtad2.lobbyservice/Runtime/Local Server/Shared from this pacakge into the repo you downloaded. Alternatively, modify the server's
+.csproj file to just include that path in the compilation.
+src files: https://github.com/TadDiDio/LocalLobbyServer
+
+## API
 To interact with the lobby, use the `Lobby.cs` API. All calls should be made through `Lobby.XXX`. This provides
 a safe way to always access functionality regardless of whether it exists or not.
 
@@ -66,7 +77,8 @@ override the base class method `ShouldFlushStateLobbies()`.
     If you do not intend to use that module, leaving it null is acceptable.
 
 ### Example 
-To see a complete example for Steamworks.NET, see the samples. 
+To see a complete example for Steamworks.NET, see the samples. Note this example depends on the following Steamworks.NET package:
+https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0
 
 The current list of provider interfaces is this:
 - `BaseProvider` (required) - Includes basic lobby services.
@@ -124,7 +136,7 @@ Views should treat `DisplayXXX` methods as idempotent meaning that just because 
 actually changed on the backend. The information passed in as parameters will always be up to date though and views are only 
 updated after the internal state so querying `Lobby.XXX` is always safe from a `DisplayXXX` callback.
 
-There is a sample view in the Local Lobby Server sample which intends to show the lobby functionality but 
+There is a sample view in the Local Server sample which intends to show the lobby functionality but 
 not how to make a view. Rather than combine everything into a one mega class like I do in the sample, I would recommend
 developing a translation layer for your own game. This means inheriting and registering views that redirect specific
 slices of events from one or more view interfaces. This would allow you to make prefabs that take in arbitrary slices of events 
