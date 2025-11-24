@@ -13,13 +13,16 @@ server so you can test your entire lobby flow with the real game UI all on one m
 - Steamworks.NET provider given as a sample.
 
 ---
+## Disclaimer
+This system was developed as tech dev for my own projects. Due to time, it has _not_ been thoroughly tested
+and assuming correctness is a dangerous game to play :)
 
 ## Installation
 
 In the package manager select Add by git url and paste the following:
 
 ```bash
-https://github.com/TadDiDio/Lobby-Service.git?path=Packages/com.radtad2.lobbyservice#latest
+https://github.com/TadDiDio/Lobby-Service.git?path=Packages/com.radtad2.lobbyservice#1.0.0
 ```
 
 ## Quick Start
