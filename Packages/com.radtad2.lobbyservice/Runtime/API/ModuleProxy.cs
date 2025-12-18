@@ -42,7 +42,7 @@ namespace LobbyService
             {
                 if (Lobby.Rules.WarnOnPreInitCommands)
                 {
-                    Debug.LogWarning($"Received a call before initialization");
+                    LobbyLogger.LogWarning($"Received a call before initialization");
                 }
                 _strategyWrapper.RegisterAction(() => targetMethod.Invoke(_target, args));
             }

@@ -62,7 +62,7 @@ namespace LobbyService.LocalServer
                 _localUser = welcome.Response.LocalMember.ToLobbyMember();
                 
                 Initialized = true;
-                Debug.Log($"[Local Lobby] Initialized as user {_localUser}");
+                LobbyLogger.Log($"Initialized as user {_localUser}");
                 Application.quitting += Shutdown;
                 return true;
             }
@@ -87,7 +87,7 @@ namespace LobbyService.LocalServer
         {
             if (!Initialized) return;
             
-            Debug.Log("[Local Lobby] Shutting down...");
+            LobbyLogger.Log("Shutting down...");
             Initialized = false;
             Application.quitting -= Shutdown;
             

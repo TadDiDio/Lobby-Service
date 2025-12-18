@@ -189,12 +189,12 @@ namespace LobbyService.Example
         
         public void DisplayExistingLobby(IReadonlyLobbyModel snapshot)
         {
-            Debug.Log("Displaying existing lobby");
+            LobbyLogger.Log("Displaying existing lobby");
         }
 
         public void DisplayCreateRequested(CreateLobbyRequest request)
         {
-            Debug.Log("Creating lobby...");
+            LobbyLogger.Log("Creating lobby...");
         }
 
         public void DisplayCreateResult(EnterLobbyResult result)
@@ -208,7 +208,7 @@ namespace LobbyService.Example
 
         public void DisplayJoinRequested(JoinLobbyRequest request)
         {
-            Debug.Log("Joining lobby...");
+            LobbyLogger.Log("Joining lobby...");
         }
 
         public void DisplayJoinResult(EnterLobbyResult result)
@@ -256,7 +256,7 @@ namespace LobbyService.Example
 
         public void DisplaySentInvite(InviteSentInfo info)
         {
-            if (info.InviteSent) Debug.Log($"Sending invite to {info.Member}...");
+            if (info.InviteSent) LobbyLogger.Log($"Sending invite to {info.Member}...");
         }
 
         public void DisplayReceivedInvite(LobbyInvite invite)
@@ -273,7 +273,7 @@ namespace LobbyService.Example
         
         public void DisplayOtherMemberLeft(LeaveInfo info)
         {
-            if (info.LeaveReason is LeaveReason.Kicked) Debug.Log($"{info.Member} was Kicked");
+            if (info.LeaveReason is LeaveReason.Kicked) LobbyLogger.Log($"{info.Member} was Kicked");
             if (!_members.TryGetValue(info.Member, out var card)) return;
             
             Destroy(card.gameObject);
@@ -309,7 +309,7 @@ namespace LobbyService.Example
 
         public void DisplayUpdateMemberData(MemberDataUpdate update)
         {
-            Debug.Log($"{update.Member} ready: {update.Data.GetOrDefault(LobbyKeys.ReadyKey, "false")}");
+            LobbyLogger.Log($"{update.Member} ready: {update.Data.GetOrDefault(LobbyKeys.ReadyKey, "false")}");
         }
 
         private struct FriendCard

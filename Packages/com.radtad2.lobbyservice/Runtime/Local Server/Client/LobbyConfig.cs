@@ -42,7 +42,7 @@ namespace LobbyService.LocalServer
             { 
                 EnsureLoaded();
                 _cached.Port = value is <= 65535 and > 0 ? value : DefaultPort; 
-                Debug.Log($"Set cached to {_cached.Port}");
+                LobbyLogger.Log($"Set cached to {_cached.Port}");
                 Save(); 
             }
         }

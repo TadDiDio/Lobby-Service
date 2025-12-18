@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace LobbyService.LocalServer
 {
@@ -65,7 +64,7 @@ namespace LobbyService.LocalServer
 
                 if (member == null)
                 {
-                    Debug.LogError($"Could not find member {kvp.Key}");
+                    LobbyLogger.LogError($"Could not find member {kvp.Key}");
                     continue;
                 }
                 

@@ -284,7 +284,7 @@ namespace LobbyService
             {
                 if (_rules.CreateWhileInLobbyPolicy == null)
                 {
-                    Debug.LogWarning("No policy set in rules for handling an attempt to create a lobby while already in one. Request denied.");
+                    LobbyLogger.LogWarning("No policy set in rules for handling an attempt to create a lobby while already in one. Request denied.");
                     return;
                 }
 
@@ -326,7 +326,7 @@ namespace LobbyService
             {
                 if (_rules.JoinWhileInLobbyPolicy == null)
                 {
-                    Debug.LogWarning("No policy set in rules for handling an attempt to join a lobby while already in one. Request denied.");
+                    LobbyLogger.LogWarning("No policy set in rules for handling an attempt to join a lobby while already in one. Request denied.");
                     return;
                 }
 
@@ -714,7 +714,7 @@ namespace LobbyService
                     
                     if (_rules.CreateFailedPolicy == null)
                     {
-                        Debug.LogWarning("No policy set in rules for handling creation failure.");
+                        LobbyLogger.LogWarning("No policy set in rules for handling creation failure.");
                         return;
                     }
 
@@ -729,7 +729,7 @@ namespace LobbyService
                 case JoinLobbyRequest joinRequest:
                     if (_rules.JoinFailedPolicy == null)
                     {
-                        Debug.LogWarning("No policy set in rules for handling join failure.");
+                        LobbyLogger.LogWarning("No policy set in rules for handling join failure.");
                         return;
                     }
 

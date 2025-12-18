@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using UnityEngine;
 
 namespace LobbyService.LocalServer
 {
@@ -13,14 +12,14 @@ namespace LobbyService.LocalServer
         {
             if (!value.StartsWith(SharedLogger.Header)) return;
             
-            Debug.Log(value);
+            LobbyLogger.Log(value);
         }
 
         public override void Write(string value)
         {
             if (!value.StartsWith(SharedLogger.Header)) return;
 
-            Debug.Log(value);
+            LobbyLogger.Log(value);
         }
 
         private static TextWriter _out;
@@ -50,14 +49,14 @@ namespace LobbyService.LocalServer
             {
                 if (!value.StartsWith(SharedLogger.Header)) return;
                 
-                Debug.LogError(value);
+                LobbyLogger.LogError(value);
             }
 
             public override void Write(string value)
             {
                 if (!value.StartsWith(SharedLogger.Header)) return;
 
-                Debug.LogError(value);
+                LobbyLogger.LogError(value);
             }
         }
     }

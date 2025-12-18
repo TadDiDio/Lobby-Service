@@ -90,7 +90,7 @@ namespace LobbyService
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"Failed to load stale lobby map: {e}");
+                LobbyLogger.LogWarning($"Failed to load stale lobby map: {e}");
                 return new Dictionary<string, string>();
             }
         }
@@ -113,7 +113,7 @@ namespace LobbyService
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"Failed to save stale lobby map: {e}");
+                LobbyLogger.LogWarning($"Failed to save stale lobby map: {e}");
             }
         }
     }

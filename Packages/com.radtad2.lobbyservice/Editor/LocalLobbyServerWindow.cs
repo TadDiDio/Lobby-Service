@@ -194,7 +194,7 @@ namespace LobbyService.LocalServer.Editor
         {
             if (!File.Exists(path))
             {
-                Debug.LogError("Cannot reveal file. It does not exist.");
+                LobbyLogger.LogError("Cannot reveal file. It does not exist.");
                 return;
             }
 
@@ -312,7 +312,7 @@ namespace LobbyService.LocalServer.Editor
                 if (assetBrowserUrl == null)
                 {
                     EditorUtility.ClearProgressBar();
-                    Debug.LogError($"Asset `{expectedName}` not found in GitHub release.");
+                    LobbyLogger.LogError($"Asset `{expectedName}` not found in GitHub release.");
                     return;
                 }
 
@@ -320,7 +320,7 @@ namespace LobbyService.LocalServer.Editor
                 if (assetId == 0)
                 {
                     EditorUtility.ClearProgressBar();
-                    Debug.LogError($"Failed to resolve asset ID for `{expectedName}`.");
+                    LobbyLogger.LogError($"Failed to resolve asset ID for `{expectedName}`.");
                     return;
                 }
 
@@ -343,7 +343,7 @@ namespace LobbyService.LocalServer.Editor
                 }
 
                 EditorUtility.ClearProgressBar();
-                Debug.Log($"Downloaded server binary for {platformKey} to: {localPath}");
+                LobbyLogger.Log($"Downloaded server binary for {platformKey} to: {localPath}");
             }
             catch (Exception e)
             {
@@ -359,13 +359,13 @@ namespace LobbyService.LocalServer.Editor
         {
             if (!File.Exists(_binaryPath))
             {
-                Debug.LogError("Server binary not found. Download it first.");
+                LobbyLogger.LogError("Server binary not found. Download it first.");
                 return;
             }
 
             if (IsServerRunning())
             {
-                Debug.Log("Server is already running.");
+                LobbyLogger.Log("Server is already running.");
                 return;
             }
 
@@ -383,7 +383,7 @@ namespace LobbyService.LocalServer.Editor
                 _serverProcess = Process.Start(psi);
                 _isServerRunning = true;
 
-                Debug.Log("Local server started.");
+                LobbyLogger.Log("Local server started.");
             }
             catch (Exception ex)
             {
@@ -397,14 +397,14 @@ namespace LobbyService.LocalServer.Editor
             {
                 if (_serverProcess == null || _serverProcess.HasExited)
                 {
-                    Debug.Log("Server is not running.");
+                    LobbyLogger.Log("Server is not running.");
                     return;
                 }
 
                 _serverProcess.Kill();
                 _serverProcess = null;
                 _isServerRunning = false;
-                Debug.Log("Server stopped.");
+                LobbyLogger.Log("Server stopped.");
             }
             catch (Exception ex)
             {

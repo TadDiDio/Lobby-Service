@@ -119,9 +119,9 @@ namespace LobbyService
                 // ReSharper restore SuspiciousTypeConversion.Global
 
                 _controller.OnEnteredLobby      += () => OnEnteredLobby?.Invoke();
-                _controller.OnLeftLobby         += i => OnLeftLobby?.Invoke(i);
-                _controller.OnOtherMemberJoined += m => OnOtherMemberJoined?.Invoke(m);
-                _controller.OnOtherMemberLeft   += m => OnOtherMemberLeft?.Invoke(m);
+                _controller.OnLeftLobby         += i  => OnLeftLobby?.Invoke(i);
+                _controller.OnOtherMemberJoined += m  => OnOtherMemberJoined?.Invoke(m);
+                _controller.OnOtherMemberLeft   += m  => OnOtherMemberLeft?.Invoke(m);
                 _controller.OnOwnershipGained   += () => OnOwnershipGained?.Invoke();
                 _controller.OnOwnershipLost     += () => OnOwnershipLost?.Invoke();
                 
@@ -141,7 +141,7 @@ namespace LobbyService
             {
                 if (_rules.WarnOnPreInitCommands)
                 {
-                    Debug.LogWarning("Received a call before initialization");
+                    LobbyLogger.LogWarning("Received a call before initialization");
                 }
                 _preInitWrapper.RegisterAction(call);
             }
