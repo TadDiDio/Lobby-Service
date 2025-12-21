@@ -1,3 +1,7 @@
+## [1.0.0] - 2025-12-20
+### Fixed Sample not Comping
+- Steamworks.NET sample now compiles after importing.
+
 ## [1.0.0] - 2025-11-22
 ### First Release
 - Allows generic lobby and party systems with decoupled front and backends.

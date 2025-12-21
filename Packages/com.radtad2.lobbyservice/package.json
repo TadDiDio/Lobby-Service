@@ -1,7 +1,7 @@
 {
   "name": "com.radtad2.lobbyservice",
   "displayName": "Lobby Service",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "unity": "2022.3",
   "description": "A modular lobby system for online multiplayer backends.",
   "author": { "name": "Tad DiDio" },
