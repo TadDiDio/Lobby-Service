@@ -1,7 +1,7 @@
 {
   "name": "com.radtad2.lobbyservice",
   "displayName": "Lobby Service",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "unity": "2022.3",
   "description": "A modular lobby system for online multiplayer backends.",
   "author": { "name": "Tad DiDio" },
@@ -12,11 +12,7 @@
     {
       "displayName": "Steamworks.NET Provider",
       "description": "Provider implementation for steamworks.NET.",
-      "path": "Samples~/Steamworks",
-      "dependencies" :
-      {
-        "com.rlabrecque.steamworks.net": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#2024.8.0"
-      }
+      "path": "Samples~/Steamworks"
     },
     {
       "displayName": "Local Server example",

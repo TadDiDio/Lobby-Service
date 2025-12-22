@@ -29,6 +29,10 @@ namespace LobbyService.LocalServer
             Application.quitting += Shutdown;
         }
         
+        /// <summary>
+        /// Waits for the API to be initialized.
+        /// </summary>
+        /// <returns>Returns false if the operation was not completed.</returns>
         public static async Task<bool> WaitForInitializationAsync(CancellationToken token)
         {
             if (Initialized) return true;
