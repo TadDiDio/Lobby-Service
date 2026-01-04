@@ -1,3 +1,7 @@
+## [1.1.1] - 2026-01-03
+### Fixed local sample bug
+- Local sample now shows friends local friends correctly.
+
 ## [1.1.0] - 2025-12-22
 ### Fixed Steam sample initialization
 - Steamworks.NET sample now initializes without warnings.
