@@ -23,7 +23,7 @@ If you run into issues or have suggestions, feel free to open an issue on GitHub
 In the package manager select Add by git url and paste the following:
 
 ```bash
-https://github.com/TadDiDio/Lobby-Service.git?path=Packages/com.radtad2.lobbyservice#1.1.1
+https://github.com/TadDiDio/Lobby-Service.git?path=Packages/com.radtad2.lobbyservice#1.2.1
 ```
 
 ## Quick Start

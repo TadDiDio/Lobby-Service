@@ -43,6 +43,16 @@ namespace LobbyService
         public event Action OnOwnershipLost;
         
         /// <summary>
+        /// Invoked when the lobby data is updated.
+        /// </summary>
+        public event Action<LobbyDataUpdate> OnLobbyDataUpdated;
+        
+        /// <summary>
+        /// Invoked when member data is updated.
+        /// </summary>
+        public event Action<MemberDataUpdate> OnMemberDataUpdated;
+        
+        /// <summary>
         /// The friends capabilities
         /// </summary>
         public IFriendAPI Friends { get; private set; }
@@ -644,6 +654,8 @@ namespace LobbyService
             if (!_model.InLobby) return;
 
             _model.LobbyData = update.Data;
+            
+            OnLobbyDataUpdated?.Invoke(update);
             _viewModule.DisplayUpdateLobbyData(update);
         }
 
@@ -652,6 +664,7 @@ namespace LobbyService
             if (!_model.InLobby) return;
 
             _model.MemberData[update.Member] = update.Data;
+            OnMemberDataUpdated?.Invoke(update);
             _viewModule.DisplayUpdateMemberData(update);
         }
         #endregion

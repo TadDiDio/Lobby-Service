@@ -124,6 +124,8 @@ namespace LobbyService
                 _controller.OnOtherMemberLeft   += m  => OnOtherMemberLeft?.Invoke(m);
                 _controller.OnOwnershipGained   += () => OnOwnershipGained?.Invoke();
                 _controller.OnOwnershipLost     += () => OnOwnershipLost?.Invoke();
+                _controller.OnLobbyDataUpdated  += d  => OnLobbyDataUpdated?.Invoke(d);
+                _controller.OnMemberDataUpdated += d  => OnMemberDataUpdated?.Invoke(d);
                 
                 if (_rules.AutoStartFriendPolling) Friends.StartPolling(_rules.FriendDiscoveryFilter, _rules.FriendPollingRateSeconds);
             
@@ -177,6 +179,16 @@ namespace LobbyService
         /// Invoked when you lose ownership of a lobby.
         /// </summary>
         public static event Action OnOwnershipLost;
+        
+        /// <summary>
+        /// Invoked when the lobby data is updated.
+        /// </summary>
+        public static event Action<LobbyDataUpdate> OnLobbyDataUpdated;
+        
+        /// <summary>
+        /// Invoked when member data is updated.
+        /// </summary>
+        public static event Action<MemberDataUpdate> OnMemberDataUpdated;
         
         /// <summary>
         /// Tries to create a lobby.

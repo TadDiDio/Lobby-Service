@@ -1,3 +1,7 @@
+## [1.2.1] - 2026-01-04
+### Events for data updates
+- Events accessible from Lobby.cs for lobby and member data updates.
+
 ## [1.1.1] - 2026-01-03
 ### Fixed local sample bug
 - Local sample now shows friends local friends correctly.
