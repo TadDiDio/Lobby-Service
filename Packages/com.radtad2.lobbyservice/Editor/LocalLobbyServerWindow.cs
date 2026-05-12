@@ -14,7 +14,7 @@ namespace LobbyService.LocalServer.Editor
     {
         private const string GitHubRepoOwner = "TadDiDio";
         private const string GitHubRepoName  = "LocalLobbyServer";
-        private const string DownloadFolder  = "LocalLobbyServerBin";
+        private const string DownloadFolder  = "LocalLobby";
 
         private static string _binaryPath;
         private static Process _serverProcess;
@@ -52,8 +52,6 @@ namespace LobbyService.LocalServer.Editor
             string expectedBinaryName = ServerPlatform.GetBinaryFileName();
             string resolvedFolder = GetCleanDownloadFolder();
             
-            if (!Directory.Exists(resolvedFolder)) Directory.CreateDirectory(resolvedFolder);
-
             _binaryPath = Path.Combine(resolvedFolder, expectedBinaryName);
 
             GUILayout.Label("Local Lobby Server Manager", EditorStyles.boldLabel);
@@ -85,8 +83,6 @@ namespace LobbyService.LocalServer.Editor
                 SetDownloadFolder(newFolder);
                 resolvedFolder = GetCleanDownloadFolder();
                 
-                if (!Directory.Exists(resolvedFolder)) Directory.CreateDirectory(resolvedFolder);
-            
                 _binaryPath = Path.Combine(resolvedFolder, expectedBinaryName);
             }
             
@@ -295,7 +291,10 @@ namespace LobbyService.LocalServer.Editor
         {
             try
             {
-                Directory.CreateDirectory(Path.Combine(Application.dataPath, "..", DownloadFolder));
+                if (!Directory.Exists(downloadFolder))
+                {
+                    Directory.CreateDirectory(downloadFolder);
+                }
 
                 EditorUtility.DisplayProgressBar("Downloading", "Fetching latest GitHub release...", 0.2f);
 

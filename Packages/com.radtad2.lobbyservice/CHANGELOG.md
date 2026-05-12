@@ -1,3 +1,7 @@
+## [1.2.2] - 2026-05-11
+### Directory creation bugfix
+- Fixed bug that created lots of file pathes
+
 ## [1.2.1] - 2026-01-04
 ### Events for data updates
 - Events accessible from Lobby.cs for lobby and member data updates.
